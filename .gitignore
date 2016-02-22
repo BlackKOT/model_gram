@@ -1,10 +1,13 @@
 *.rbc
 capybara-*.html
 .rspec
+.ruby-gemset
+.ruby-version
 /log
 /tmp
 /db/*.sqlite3
 /db/*.sqlite3-journal
+/config/database.yml
 /public/system
 /coverage/
 /spec/tmp

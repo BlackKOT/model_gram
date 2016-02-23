@@ -13,3 +13,10 @@
 //= require jquery
 //= require jquery_ujs
 //= require_tree .
+
+window.svg = window.svg_canvas();
+
+$('document').ready(function() {
+    rect = svg.figures.createRect(20, 20, 100, 100, 20, 20);
+    svg.addFigure(rect);
+});

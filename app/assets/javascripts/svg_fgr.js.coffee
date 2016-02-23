@@ -1,9 +1,8 @@
 #= require ./svg_events
 
+window.fgr_events = svg_events();
+
 window.svg_fgr = ->
-  events = svg_events()
-
-
   addNodeToFgr = (fgr, node) ->
     fgr.appendChild(node)
 
@@ -21,9 +20,12 @@ window.svg_fgr = ->
     fgr.setAttribute('stroke-linecap', cap)
 
 
-  setBrush = (fgr, fill = 'none', fill_rule = 'evenodd') ->
+  # fill_rule: evenodd
+  setBrush = (fgr, fill = 'none', fill_rule) ->
     fgr.setAttribute('fill', fill)
-    fgr.setAttribute('fill-rule', fill_rule)
+
+    if (fill_rule)
+      fgr.setAttribute('fill-rule', fill_rule)
 
 
   # "fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9"
@@ -45,7 +47,7 @@ window.svg_fgr = ->
     text.setAttribute('x', x + 'px')
     text.setAttribute('y', y + 'px')
     addNodeToFgr(text, document.createTextNode(msg))
-    events.attachEventAttributes(text)
+    fgr_events.attachEventAttributes(text)
     text
 
   appendSublIneToText = (textFgr, x, y, msg) ->
@@ -69,7 +71,7 @@ window.svg_fgr = ->
     line.setAttribute('y1', y1 + 'px')
     line.setAttribute('x2', x2 + 'px')
     line.setAttribute('y2', y2 + 'px')
-    events.attachEventAttributes(line)
+    fgr_events.attachEventAttributes(line)
     line
 
   createRect = (x, y, width, height, roundCornerX = 0, roundCornerY = 0) ->
@@ -80,7 +82,7 @@ window.svg_fgr = ->
     rect.setAttribute('height', height + 'px')
     rect.setAttribute('rx', roundCornerX + 'px')
     rect.setAttribute('ry', roundCornerY + 'px')
-    events.attachEventAttributes(rect)
+    fgr_events.attachEventAttributes(rect)
     rect
 
 
@@ -89,7 +91,7 @@ window.svg_fgr = ->
     circle.setAttribute('cx', centerX + 'px')
     circle.setAttribute('cy', centerY + 'px')
     circle.setAttribute('r', radius + 'px')
-    events.attachEventAttributes(circle)
+    fgr_events.attachEventAttributes(circle)
     circle
 
 
@@ -99,7 +101,7 @@ window.svg_fgr = ->
     ellipse.setAttribute('cy', centerY + 'px')
     ellipse.setAttribute('rx', radiusX + 'px')
     ellipse.setAttribute('ry', radiusY + 'px')
-    events.attachEventAttributes(ellipse)
+    fgr_events.attachEventAttributes(ellipse)
     ellipse
 
   # The points attribute defines the x and y coordinates for each corner of the polygon
@@ -107,7 +109,7 @@ window.svg_fgr = ->
   createPolyline = (points) ->
     polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
     polyline.setAttribute('points', points)
-    events.attachEventAttributes(polyline)
+    fgr_events.attachEventAttributes(polyline)
     polyline
 
 
@@ -116,7 +118,7 @@ window.svg_fgr = ->
   createPolygon = (points) ->
     polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
     polygon.setAttribute('points', points)
-    events.attachEventAttributes(polygon)
+    fgr_events.attachEventAttributes(polygon)
     polygon
 
 
@@ -140,7 +142,7 @@ window.svg_fgr = ->
   createPath = (commands) ->
     path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     path.setAttribute('d', commands)
-    events.attachEventAttributes(path)
+    fgr_events.attachEventAttributes(path)
     path
 
   return {

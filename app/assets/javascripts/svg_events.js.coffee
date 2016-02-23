@@ -6,7 +6,7 @@ window.svg_events = ->
 
   attachEventAttributes = (obj) ->
     obj.setAttribute('transform', 'matrix(1 0 0 1 0 0)')
-    obj.setAttribute('onmousedown', 'svg_events().selectElement(evt)')
+    obj.setAttribute('onmousedown', 'fgr_events.selectElement(evt)')
     obj.setAttribute('class', 'draggable')
 
 
@@ -15,12 +15,12 @@ window.svg_events = ->
     currentX = evt.clientX
     currentY = evt.clientY
     currentMatrix = selectedElement.getAttributeNS(null, 'transform').slice(7,-1).split(' ')
-    for i in [0..currentMatrix.length]
+    for i in [0...currentMatrix.length]
       currentMatrix[i] = parseFloat(currentMatrix[i])
 
-    selectedElement.setAttributeNS(null, 'onmousemove', 'svg_events().moveElement(evt)')
-    selectedElement.setAttributeNS(null, 'onmouseout', 'svg_events().deselectElement(evt)')
-    selectedElement.setAttributeNS(null, 'onmouseup', 'svg_events().deselectElement(evt)')
+    selectedElement.setAttributeNS(null, 'onmousemove', 'fgr_events.moveElement(evt)')
+    selectedElement.setAttributeNS(null, 'onmouseout', 'fgr_events.deselectElement(evt)')
+    selectedElement.setAttributeNS(null, 'onmouseup', 'fgr_events.deselectElement(evt)')
 
 
   moveElement = (evt) ->
@@ -45,5 +45,7 @@ window.svg_events = ->
 
   return {
     selectElement: selectElement
+    moveElement: moveElement
+    deselectElement: deselectElement
     attachEventAttributes: attachEventAttributes
   }

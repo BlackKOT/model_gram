@@ -42,7 +42,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 
-  # gem "rel_gram", path: "/MyPath/MyGem.gem"
+  gem 'rel_gram', path: '/home/jb/projects/rel_gram'
 end
 
 group :production do

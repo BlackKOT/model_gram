@@ -90,9 +90,15 @@ window.canva = ->
 
   calc_grid = ->
     for i in [0...canvas.width / grid]
-      canvas.add(new fabric.Line([ i * grid, 0, i * grid, canvas.height], { stroke: '#ccc', selectable: false }));
+      yline = new fabric.Line([ i * grid, 0, i * grid, canvas.height], { stroke: '#ccc', selectable: false })
+      canvas.add(yline)
+      yline.sendToBack()
+
     for j in [0...canvas.height / grid]
-      canvas.add(new fabric.Line([ 0, j * grid, canvas.width, j * grid], { stroke: '#ccc', selectable: false }))
+      xline = new fabric.Line([ 0, j * grid, canvas.width, j * grid], { stroke: '#ccc', selectable: false })
+      canvas.add(xline)
+      xline.sendToBack()
+
 
 
   init = ->

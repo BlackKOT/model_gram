@@ -1,13 +1,37 @@
 #= require fabric.min
 
 fabric.Object::isText = ->
-  @get('type') == 'text'
+  @get('type') == 'text' || @get('type') == 'table_field'
 
 fabric.Object::isTable = ->
   @get('type') == 'table'
 
 fabric.Object::isRelation = ->
   @get('type') == 'lineArrow'
+
+fabric.Object::boundingRect = ->
+  table = @group
+  x_offset = if table then table.left else 0
+  y_offset = if table then table.top else 0
+  width = if table && @isText() then table.width else @width
+
+  {
+    x: x_offset + @originalLeft
+    y: y_offset + @originalTop
+    width: width * @scaleX # are scale needs ?
+    height: @height * @scaleY  # are scale needs ?
+  }
+
+fabric.TableField = fabric.util.createClass(fabric.Text,
+  type: 'table_field'
+  initialize: (element, options) ->
+    @callSuper 'initialize', element, options
+    return
+
+  toObject: ->
+    fabric.util.object.extend @callSuper('toObject')
+)
+
 
 fabric.Table = fabric.util.createClass(fabric.Group,
   type: 'table'
@@ -30,7 +54,7 @@ fabric.Table = fabric.util.createClass(fabric.Group,
       height: element.min_table_height
       rx: 10
       ry: 10
-      fill: 'rgba(0,0,0,0)'
+      fill: 'rgba(255,255,255,192)'
       stroke: 'black'
       strokeWidth: 3
     })
@@ -60,11 +84,10 @@ fabric.Table = fabric.util.createClass(fabric.Group,
         stroke: 'black'
         strokeWidth: 1
       })
-      table_field_text = new fabric.Text(field.name, {
+      table_field_text = new fabric.TableField(field.name, {
         left: start_x
         top: start_y + 4
         fontSize: 18
-        fontWeight: 'bold'
       })
 
       max_width = Math.max(max_width, table_field_text.width + text_padding)

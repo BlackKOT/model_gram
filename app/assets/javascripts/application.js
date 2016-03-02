@@ -11,7 +11,7 @@ $('document').ready(function() {
     canvas.init();
 
     canvas.addTable({
-        name: 'Lol',
+        table_name: 'Lol',
         fields: [
             { name: 'field1' },
             { name: 'field2' },
@@ -20,7 +20,7 @@ $('document').ready(function() {
     });
 
     canvas.addTable({
-        name: 'Loldfgdfgdfgdgfdfgd',
+        table_name: 'Loldfgdfgdfgdgfdfgd',
         fields: [
             { name: 'field1' },
             { name: 'field2' },

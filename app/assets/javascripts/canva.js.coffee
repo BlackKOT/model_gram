@@ -170,13 +170,14 @@ window.canva = ->
 
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)
-        to_pointer = canvas.getPointer(options.e, true)
+        to_pointer = canvas.getPointer(options.e)
         from_pointer = getObjectPoint(canvas.addChild.start)
 
         if (projection_line)
           projection_line.set
             'x2': to_pointer.x
             'y2': to_pointer.y
+          canvas.renderAll()
         else
           projection_line = new (fabric.LineArrow)([
             from_pointer.x

@@ -19,6 +19,20 @@ $('document').ready(function() {
         ]
     });
 
+    canvas.addTable({
+        name: 'Loldfgdfgdfgdgfdfgd',
+        fields: [
+            { name: 'field1' },
+            { name: 'field2' },
+            { name: 'field3' },
+            { name: 'field4' },
+            { name: 'field5' },
+            { name: 'fielddfgdgdfgdfgdfgdfgdfg6' },
+            { name: 'field7' },
+            { name: 'field8' }
+        ]
+    });
+
     //rect = svg.figures.createRect(20, 20, 100, 100, 20, 20);
     //svg.addFigure(rect);
     //

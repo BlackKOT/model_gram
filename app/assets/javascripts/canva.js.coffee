@@ -193,8 +193,11 @@ window.canva = ->
 
   addTable = (attrs) ->
     start_x = 10
-    start_y = 25
     text_height = 25
+    text_padding = 20
+    start_y = text_height
+    max_width = min_table_width
+
 
     rect = new fabric.Rect({
       left: 0
@@ -207,6 +210,7 @@ window.canva = ->
       stroke: 'black'
       strokeWidth: 3
     })
+
     table_name = new fabric.Text(attrs.name, {
       left: start_x
       top: 4
@@ -215,6 +219,8 @@ window.canva = ->
 #      originX: 'center'
 #      originY: 'center'
     })
+
+    max_width = Math.max(max_width, table_name.width + text_padding)
 
     table_field_line = new fabric.Line([0, start_y, min_table_width, start_y], {
       fill: 'rgba(0,0,0,0)'
@@ -235,14 +241,18 @@ window.canva = ->
         top: start_y + 4
         fontSize: 18
         fontWeight: 'bold'
-#        originX: 'center'
-  #      originY: 'center'
       })
 
+      max_width = Math.max(max_width, table_field_text.width + text_padding)
       group_elements.push(table_field_line)
       group_elements.push(table_field_text)
       start_y += text_height
 
+
+    rect.set({ width: max_width, height: start_y })
+    for obj in group_elements
+      if obj.get('type') != 'text'
+        obj.set({ width: max_width })
 
     canvas.add(new fabric.Group(group_elements, {
       name: name,

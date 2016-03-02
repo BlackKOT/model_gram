@@ -1,17 +1,46 @@
 #= require fabric.linecap
 #= require fabric.canvasex
 
+
+fabric.Canvas::getObjectsByName = (name) ->
+  objectList = []
+  objects = @getObjects()
+  i = 0
+  len = @size()
+  while i < len
+    if objects[i].name and objects[i].name == name
+      objectList.push objects[i]
+    i++
+  objectList
+
+
+fabric.Canvas::getObjectByName = (name) ->
+  object = null
+  objects = @getObjects()
+  i = 0
+  len = @size()
+  while i < len
+    if objects[i].name and objects[i].name == name
+      object = objects[i]
+      break
+    i++
+  object
+
+
 window.canva = ->
   grid = 25
+  min_table_width = 80
+  min_table_height = 120
   canvas = undefined
 
-  addChildLine = (options) ->
-    canvas.off 'object:selected', addChildLine
-    # add the line
-    fromObject = canvas.addChild.start
-    toObject = options.target
-    from = fromObject.getCenterPoint()
-    to = toObject.getCenterPoint()
+
+  getObjectPoint = (object) ->
+    object.getCenterPoint()
+
+
+  drawLine = (fromObject, toObject) ->
+    from = getObjectPoint(fromObject)
+    to = getObjectPoint(toObject)
     line = new (fabric.LineArrow)([
       from.x
       from.y
@@ -31,7 +60,7 @@ window.canva = ->
 
     canvas.add line
     # so that the line is behind the connected shapes
-#    line.sendToBack()
+    #    line.sendToBack()
     # add a reference to the line to each object
     fromObject.addChild =
       from: fromObject.addChild and fromObject.addChild.from or []
@@ -54,14 +83,24 @@ window.canva = ->
         return
       return
 
+
+  addChildLine = (options) ->
+    canvas.off 'object:selected', addChildLine
+    # add the line
+    fromObject = canvas.addChild.start
+    toObject = options.target
+
+    drawLine(fromObject, toObject)
+
     # undefined instead of delete since we are anyway going to do this many times
     canvas.addChild = undefined
     return
 
+
   addChildMoveLine = (event) ->
     canvas.on event, (options) ->
       object = options.target
-      objectCenter = object.getCenterPoint()
+      objectCenter = getObjectPoint(object)
       # udpate lines (if any)
       if object.addChild
         if object.addChild.from
@@ -129,20 +168,20 @@ window.canva = ->
     window.addEventListener('resize', resize, false)
     resize()
 
-    canvas.add(new fabric.Rect({
-      left: 100,
-      top: 100,
-      width: 50,
-      height: 50,
-      fill: '#faa',
-      originX: 'left',
-      originY: 'top',
-      centeredRotation: true
-    }));
-
-    canvas.add(new fabric.Circle({
-      radius: 20, fill: 'green', left: 100, top: 100
-    }))
+#    canvas.add(new fabric.Rect({
+#      left: 100,
+#      top: 100,
+#      width: 50,
+#      height: 50,
+#      fill: '#faa',
+#      originX: 'left',
+#      originY: 'top',
+#      centeredRotation: true
+#    }));
+#
+#    canvas.add(new fabric.Circle({
+#      radius: 20, fill: 'green', left: 100, top: 100
+#    }))
 
 
   addRelation = ->
@@ -152,11 +191,70 @@ window.canva = ->
     canvas.on 'object:selected', addChildLine
 
 
-  addTable = ->
+  addTable = (attrs) ->
+    start_x = 10
+    start_y = 25
+    text_height = 25
+
+    rect = new fabric.Rect({
+      left: 0
+      top: 0
+      width: min_table_width
+      height: min_table_height
+      rx: 10
+      ry: 10
+      fill: 'rgba(0,0,0,0)'
+      stroke: 'black'
+      strokeWidth: 3
+    })
+    table_name = new fabric.Text(attrs.name, {
+      left: start_x
+      top: 4
+      fontSize: 18
+      fontWeight: 'bold'
+#      originX: 'center'
+#      originY: 'center'
+    })
+
+    table_field_line = new fabric.Line([0, start_y, min_table_width, start_y], {
+      fill: 'rgba(0,0,0,0)'
+      stroke: 'black'
+      strokeWidth: 3
+    })
+
+    group_elements = [rect, table_name, table_field_line]
+
+    for field in attrs.fields
+      table_field_line = new fabric.Line([0, start_y, min_table_width, start_y], {
+        fill: 'rgba(0,0,0,0)'
+        stroke: 'black'
+        strokeWidth: 1
+      })
+      table_field_text = new fabric.Text(field.name, {
+        left: start_x
+        top: start_y + 4
+        fontSize: 18
+        fontWeight: 'bold'
+#        originX: 'center'
+  #      originY: 'center'
+      })
+
+      group_elements.push(table_field_line)
+      group_elements.push(table_field_text)
+      start_y += text_height
 
 
-  removeTable = ->
-    object = canvas.getActiveObject()
+    canvas.add(new fabric.Group(group_elements, {
+      name: name,
+      left: 150,
+      top: 100,
+#      angle: -10
+    }))
+
+
+
+  removeTable = (name) ->
+    object = canvas.getObjectByName(name)
     # remove lines (if any)
     if object.addChild
       if object.addChild.from

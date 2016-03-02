@@ -10,6 +10,14 @@ window.canvas = window.canva();
 $('document').ready(function() {
     canvas.init();
 
+    canvas.addTable({
+        name: 'Lol',
+        fields: [
+            { name: 'field1' },
+            { name: 'field2' },
+            { name: 'field3' }
+        ]
+    });
 
     //rect = svg.figures.createRect(20, 20, 100, 100, 20, 20);
     //svg.addFigure(rect);

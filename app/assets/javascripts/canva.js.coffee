@@ -121,26 +121,27 @@ window.canva = ->
     return
 
 
-  addChildMoveLine = (event) ->
+  addChildMoveLine = (event) -> # need to update checking of line existance
+    # at this moment lines existance checked only for table - not for table fields :(
     canvas.on event, (options) ->
       object = options.target
       objectCenter = getObjectPoint(object)
       # udpate lines (if any)
+
       if object.addChild
         if object.addChild.from
-          object.addChild.from.forEach (line) ->
-            line.set
+          object.addChild.from.forEach (from_line) ->
+            from_line.set
               'x1': objectCenter.x
               'y1': objectCenter.y
-            return
+
         if object.addChild.to
-          object.addChild.to.forEach (line) ->
-            line.set
+          object.addChild.to.forEach (to_line) ->
+            to_line.set
               'x2': objectCenter.x
               'y2': objectCenter.y
-            return
+
       canvas.renderAll()
-      return
     return
 
 

@@ -98,7 +98,7 @@ window.canva = ->
 
   addRelation = (options) ->
     toObject = canvas.getFieldInTable(options.target, options)
-    if (!toObject.isTableField())
+    if (!toObject || !toObject.isTableField())
       return
 
     canvas.off 'object:selected', addRelation
@@ -116,7 +116,7 @@ window.canva = ->
   registerRelation = (fromObject, toObject) ->
     from = getObjectPoint(fromObject, toObject.boundingRect())
     to = getObjectPoint(toObject, fromObject.boundingRect())
-    line = new (fabric.LineArrow)([
+    line = new (fabric.RelArrow)([
       from.x
       from.y
       to.x
@@ -244,7 +244,7 @@ window.canva = ->
             'y2': to_pointer.y
           canvas.renderAll()
         else
-          projection_line = new (fabric.LineArrow)([
+          projection_line = new (fabric.RelArrow)([
             from_pointer.x
             from_pointer.y
             to_pointer.x

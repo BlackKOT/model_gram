@@ -10,7 +10,7 @@ fabric.Object::isTableField = ->
   @get('type') == 'table_field'
 
 fabric.Object::isRelation = ->
-  @get('type') == 'lineArrow'
+  @get('type') == 'relArrow'
 
 fabric.Object::boundingRect = ->
   table = @group
@@ -119,8 +119,8 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 )
 
 
-fabric.LineArrow = fabric.util.createClass(fabric.Line,
-  type: 'lineArrow'
+fabric.RelArrow = fabric.util.createClass(fabric.Line,
+  type: 'relArrow'
   initialize: (element, options) ->
     options or (options = {})
     @callSuper 'initialize', element, options
@@ -134,10 +134,10 @@ fabric.LineArrow = fabric.util.createClass(fabric.Line,
       return
 
     ctx.save()
-    xDiff = @x2 - (@x1)
-    yDiff = @y2 - (@y1)
+    xDiff = @x2 - @x1
+    yDiff = @y2 - @y1
     angle = Math.atan2(yDiff, xDiff)
-    ctx.translate (@x2 - (@x1)) / 2, (@y2 - (@y1)) / 2
+    ctx.translate xDiff / 2, yDiff / 2
     ctx.rotate angle
     ctx.beginPath()
     #move 10px in front of line to start the arrow so it does not have the square line end showing in front (0,0)
@@ -151,8 +151,8 @@ fabric.LineArrow = fabric.util.createClass(fabric.Line,
     return
 )
 
-fabric.LineArrow.fromObject = (object, callback) ->
-  callback and callback(new (fabric.LineArrow)([
+fabric.RelArrow.fromObject = (object, callback) ->
+  callback and callback(new (fabric.RelArrow)([
     object.x1
     object.y1
     object.x2
@@ -160,4 +160,4 @@ fabric.LineArrow.fromObject = (object, callback) ->
   ], object))
   return
 
-fabric.LineArrow.async = true
+fabric.RelArrow.async = true

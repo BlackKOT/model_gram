@@ -73,6 +73,7 @@ window.canva = ->
 
   cancelRelation = ->
     canvas.addChild = undefined
+    canvas.off 'object:selected', addRelation
     if (projection_line)
       canvas.remove(projection_line)
       projection_line = undefined
@@ -194,6 +195,13 @@ window.canva = ->
     canvas = new fabric.CanvasEx('c', { selection: false })
     canvas.fireEventForObjectInsideGroup = true
 
+    canvas.on('object:moving', (options) ->
+      options.target.set({
+        left: Math.round(options.target.left / grid) * grid,
+        top: Math.round(options.target.top / grid) * grid
+      })
+    )
+
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)
         to_pointer = canvas.getPointer(options.e)
@@ -219,12 +227,13 @@ window.canva = ->
           canvas.add projection_line
     )
 
+    canvas.on('mouse:down', (options) ->
+      if (options.e.which == 3) # right mouse button
+        return cancelRelation()
 
-    canvas.on('object:moving', (options) ->
-      options.target.set({
-        left: Math.round(options.target.left / grid) * grid,
-        top: Math.round(options.target.top / grid) * grid
-      })
+      curr_obj = canvas.getActiveObject();
+      if (!curr_obj)
+        cancelRelation()
     )
 
     canvas.on('mouse:dblclick', (options) ->
@@ -240,9 +249,6 @@ window.canva = ->
       else
         cancelRelation()
     )
-
-    #canvas.observe('mouse:down', (options) ->
-    #)
 
     ['object:moving', 'object:scaling'].forEach(redrawRelation)
     window.addEventListener('resize', resize, false)

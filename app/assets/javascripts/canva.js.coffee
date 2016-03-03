@@ -97,10 +97,14 @@ window.canva = ->
 
 
   addRelation = (options) ->
+    toObject = canvas.getFieldInTable(options.target, options)
+    if (!toObject.isTableField())
+      return
+
     canvas.off 'object:selected', addRelation
     # add the line
     fromObject = canvas.addChild.start
-    toObject = canvas.getFieldInTable(options.target, options)
+
 
     registerRelation(fromObject, toObject)
 
@@ -218,7 +222,7 @@ window.canva = ->
 
   init = ->
     canvas = new fabric.CanvasEx('c', { selection: false })
-    canvas.fireEventForObjectInsideGroup = true
+#    canvas.fireEventForObjectInsideGroup = true
 
 #    canvas.on('object:moving', (options) ->
 #      options.target.set({
@@ -234,6 +238,8 @@ window.canva = ->
 
         if (projection_line)
           projection_line.set
+            'x1': from_pointer.x
+            'y1': from_pointer.y
             'x2': to_pointer.x
             'y2': to_pointer.y
           canvas.renderAll()
@@ -267,9 +273,8 @@ window.canva = ->
 
       curr_obj = canvas.getActiveObject();
       curr_obj = canvas.getFieldInTable(curr_obj, options)
-      console.log(curr_obj)
 
-      if (curr_obj)
+      if (curr_obj && curr_obj.isTableField())
         startRelation(curr_obj)
       else
         cancelRelation()

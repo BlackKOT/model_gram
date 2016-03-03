@@ -6,6 +6,9 @@ fabric.Object::isText = ->
 fabric.Object::isTable = ->
   @get('type') == 'table'
 
+fabric.Object::isTableField = ->
+  @get('type') == 'table_field'
+
 fabric.Object::isRelation = ->
   @get('type') == 'lineArrow'
 

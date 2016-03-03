@@ -75,7 +75,7 @@ window.canva = ->
       rel_center = toRect.center
       obj_center = rect.center
 
-      res.x = if (rel_center.x <= obj_center.x) then rect.x - 12 else rect.x + rect.width - 10
+      res.x = if (rel_center.x <= obj_center.x) then rect.x - 12 else rect.x + rect.width - 12
       res.y = rect.y + rect.height / 2
 
     res
@@ -105,7 +105,6 @@ window.canva = ->
     # add the line
     fromObject = canvas.addChild.start
 
-
     registerRelation(fromObject, toObject)
 
     # undefined instead of delete since we are anyway going to do this many times
@@ -117,10 +116,8 @@ window.canva = ->
     from = getObjectPoint(fromObject, toObject.boundingRect())
     to = getObjectPoint(toObject, fromObject.boundingRect())
     line = new (fabric.RelArrow)([
-      from.x
-      from.y
-      to.x
-      to.y
+      {x: from.x, y: from.y}
+      {x: to.x, y: to.y}
     ],
       fill: 'red'
       stroke: 'red'
@@ -179,7 +176,7 @@ window.canva = ->
             fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
             toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
 
-            line_obj.line.set
+            line_obj.line.updateCoords
               'x1': fromPoint.x
               'y1': fromPoint.y
               'x2': toPoint.x
@@ -190,7 +187,7 @@ window.canva = ->
             fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
             toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
 
-            line_obj.line.set
+            line_obj.line.updateCoords
               'x1': fromPoint.x
               'y1': fromPoint.y
               'x2': toPoint.x
@@ -237,7 +234,7 @@ window.canva = ->
         from_pointer = getObjectPoint(canvas.addChild.start, pointertoRect(to_pointer))
 
         if (projection_line)
-          projection_line.set
+          projection_line.updateCoords
             'x1': from_pointer.x
             'y1': from_pointer.y
             'x2': to_pointer.x
@@ -245,10 +242,8 @@ window.canva = ->
           canvas.renderAll()
         else
           projection_line = new (fabric.RelArrow)([
-            from_pointer.x
-            from_pointer.y
-            to_pointer.x
-            to_pointer.y
+            {x: from_pointer.x, y: from_pointer.y}
+            {x: to_pointer.x, y: to_pointer.y}
           ],
             fill: 'red'
             stroke: 'red'

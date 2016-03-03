@@ -119,23 +119,66 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 )
 
 
-fabric.RelArrow = fabric.util.createClass(fabric.Line,
+fabric.RelArrow = fabric.util.createClass(fabric.Polyline,
   type: 'relArrow'
+  bounds: {l: 9999, t: 9999, r: -9999, b: -9999}
+
   initialize: (element, options) ->
     options or (options = {})
     @callSuper 'initialize', element, options
+    @updateBounds()
     return
+
+  updateBounds: ->
+    for point in @points
+      @bounds.l = Math.min(@bounds.l, point.x)
+      @bounds.r = Math.max(@bounds.r, point.x)
+
+      @bounds.t = Math.min(@bounds.t, point.y)
+      @bounds.b = Math.max(@bounds.b, point.y)
+
+
+  updateCoords: (pointsHash) ->
+    @points[0] = {x: pointsHash.x1, y: pointsHash.y1}
+    @points[@points.length - 1] = {x: pointsHash.x2, y: pointsHash.y2}
+    @updateBounds()
+
+
+
+
+#  updateDimensions: ->
+#    dims = @_parseDimensions()
+#    @setWidth(dims.width)
+#    @setHeight(dims.height)
+#    @pathOffset.x = @width / 2
+#    @pathOffset.y = @height / 2
+#    @setCoords()
+
+
   toObject: ->
     fabric.util.object.extend @callSuper('toObject')
   _render: (ctx) ->
-    @callSuper '_render', ctx
+#    @callSuper '_render', ctx
     # do not render if width/height are zeros or object is not visible
+    console.log(@points)
     if !@visible
       return
-
+#
+#
     ctx.save()
-    xDiff = @x2 - @x1
-    yDiff = @y2 - @y1
+
+    ctx.moveTo @points[0].x, @points[0].y
+    for point in @points[1...]
+      ctx.lineTo point.x, point.y
+
+    ctx.stroke();
+
+    point2 = @points[@points.length - 1]
+    point1 = @points[@points.length - 2]
+
+    xDiff = point2.x - point1.x
+    yDiff = point2.y - point1.y
+
     angle = Math.atan2(yDiff, xDiff)
     ctx.translate xDiff / 2, yDiff / 2
     ctx.rotate angle

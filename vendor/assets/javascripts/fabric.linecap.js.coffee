@@ -122,8 +122,9 @@ fabric.LineArrow = fabric.util.createClass(fabric.Line,
   _render: (ctx) ->
     @callSuper '_render', ctx
     # do not render if width/height are zeros or object is not visible
-    if @width == 0 or @height == 0 or !@visible
+    if !@visible
       return
+
     ctx.save()
     xDiff = @x2 - (@x1)
     yDiff = @y2 - (@y1)

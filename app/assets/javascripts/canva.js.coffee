@@ -200,7 +200,7 @@ window.canva = ->
     canvas.setWidth(window.innerWidth)
     canvas.setHeight(window.innerHeight)
     canvas.calcOffset()
-    calc_grid()
+#    calc_grid()
 
 
   calc_grid = ->
@@ -220,12 +220,12 @@ window.canva = ->
     canvas = new fabric.CanvasEx('c', { selection: false })
     canvas.fireEventForObjectInsideGroup = true
 
-    canvas.on('object:moving', (options) ->
-      options.target.set({
-        left: Math.round(options.target.left / grid) * grid,
-        top: Math.round(options.target.top / grid) * grid
-      })
-    )
+#    canvas.on('object:moving', (options) ->
+#      options.target.set({
+#        left: Math.round(options.target.left / grid) * grid,
+#        top: Math.round(options.target.top / grid) * grid
+#      })
+#    )
 
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)

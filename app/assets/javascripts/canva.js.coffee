@@ -28,6 +28,9 @@ fabric.Canvas::getObjectByName = (name) ->
 
 
 fabric.Canvas::getFieldInTable = (table, options) ->
+  if (!table || !table.isTable())
+    return table
+
   pointer = @getPointer(options.e, true)
   i = table.size()
   while i--
@@ -61,8 +64,34 @@ window.canva = ->
     res
 
 
+  startRelation = (startObject) ->
+    canvas.addChild = start: startObject
+    # for when addChild is clicked twice
+    canvas.off 'object:selected', addRelation
+    canvas.on 'object:selected', addRelation
 
-  drawLine = (fromObject, toObject) ->
+
+  cancelRelation = ->
+    canvas.addChild = undefined
+    if (projection_line)
+      canvas.remove(projection_line)
+      projection_line = undefined
+
+
+  addRelation = (options) ->
+    canvas.off 'object:selected', addRelation
+    # add the line
+    fromObject = canvas.addChild.start
+    toObject = canvas.getFieldInTable(options.target, options)
+
+    registerRelation(fromObject, toObject)
+
+    # undefined instead of delete since we are anyway going to do this many times
+    cancelRelation()
+    return
+
+
+  registerRelation = (fromObject, toObject) ->
     from = getObjectPoint(fromObject)
     to = getObjectPoint(toObject)
     line = new (fabric.LineArrow)([
@@ -86,58 +115,54 @@ window.canva = ->
     # so that the line is behind the connected shapes
     #    line.sendToBack()
     # add a reference to the line to each object
-    fromObject.addChild =
-      from: fromObject.addChild and fromObject.addChild.from or []
-      to: fromObject.addChild and fromObject.addChild.to
-    fromObject.addChild.from.push line
-    toObject.addChild =
-      from: toObject.addChild and toObject.addChild.from
-      to: toObject.addChild and toObject.addChild.to or []
-    toObject.addChild.to.push line
+
+    fromContainer = if fromObject.group then fromObject.group else fromObject
+    toContainer = if toObject.group then toObject.group else toObject
+
+
+    fromContainer.addChild =
+      from: fromContainer.addChild and fromContainer.addChild.from or []
+      to: fromContainer.addChild and fromContainer.addChild.to or []
+    fromContainer.addChild.from.push {el: fromObject, line: line}
+
+    toContainer.addChild =
+      from: toContainer.addChild and toContainer.addChild.from or []
+      to: toContainer.addChild and toContainer.addChild.to or []
+    toContainer.addChild.to.push {el: toObject, line: line}
+
     # to remove line references when the line gets removed
 
-    line.addChildRemove = ->
+    line.unlink = ->
       fromObject.addChild.from.forEach (e, i, arr) ->
-        if e == line
+        if e.line == line
           arr.splice i, 1
-        return
+
       toObject.addChild.to.forEach (e, i, arr) ->
-        if e == line
+        if e.line == line
           arr.splice i, 1
-        return
+
       return
 
 
-  addChildLine = (options) ->
-    canvas.off 'object:selected', addChildLine
-    # add the line
-    fromObject = canvas.addChild.start
-    toObject = options.target
 
-    drawLine(fromObject, toObject)
-
-    # undefined instead of delete since we are anyway going to do this many times
-    dropRelation()
-    return
-
-
-  addChildMoveLine = (event) -> # need to update checking of line existance
+  redrawRelation = (event) -> # need to update checking of line existance
     # at this moment lines existance checked only for table - not for table fields :(
     canvas.on event, (options) ->
       object = options.target
-      objectCenter = getObjectPoint(object)
       # udpate lines (if any)
 
       if object.addChild
         if object.addChild.from
-          object.addChild.from.forEach (from_line) ->
-            from_line.set
+          object.addChild.from.forEach (line_obj) ->
+            objectCenter = getObjectPoint(line_obj.el)
+            line_obj.line.set
               'x1': objectCenter.x
               'y1': objectCenter.y
 
         if object.addChild.to
-          object.addChild.to.forEach (to_line) ->
-            to_line.set
+          object.addChild.to.forEach (line_obj) ->
+            objectCenter = getObjectPoint(line_obj.el)
+            line_obj.line.set
               'x2': objectCenter.x
               'y2': objectCenter.y
 
@@ -167,7 +192,7 @@ window.canva = ->
 
   init = ->
     canvas = new fabric.CanvasEx('c', { selection: false })
-#    canvas.fireEventForObjectInsideGroup = true
+    canvas.fireEventForObjectInsideGroup = true
 
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)
@@ -204,40 +229,25 @@ window.canva = ->
 
     canvas.on('mouse:dblclick', (options) ->
       if (options.e.which == 3) # right mouse button
-        return dropRelation()
+        return cancelRelation()
 
       curr_obj = canvas.getActiveObject();
-
-      if (curr_obj.isTable())
-        curr_obj = canvas.getFieldInTable(curr_obj, options)
-        console.log(curr_obj)
+      curr_obj = canvas.getFieldInTable(curr_obj, options)
+      console.log(curr_obj)
 
       if (curr_obj)
-        addRelation(curr_obj)
+        startRelation(curr_obj)
       else
-        dropRelation()
+        cancelRelation()
     )
 
     #canvas.observe('mouse:down', (options) ->
     #)
 
-    ['object:moving', 'object:scaling'].forEach(addChildMoveLine)
-
+    ['object:moving', 'object:scaling'].forEach(redrawRelation)
     window.addEventListener('resize', resize, false)
     resize()
 
-
-  addRelation = (startObject) ->
-    canvas.addChild = start: startObject
-    # for when addChild is clicked twice
-    canvas.off 'object:selected', addChildLine
-    canvas.on 'object:selected', addChildLine
-
-  dropRelation = ->
-    canvas.addChild = undefined
-    if (projection_line)
-      canvas.remove(projection_line)
-      projection_line = undefined
 
 
   addTable = (attrs) ->
@@ -270,7 +280,7 @@ window.canva = ->
         i = object.addChild.from.length - 1
         while i >= 0
           from_line = object.addChild.from[i]
-          from_line.addChildRemove()
+          from_line.unlink()
           from_line.remove()
           i--
 
@@ -278,7 +288,7 @@ window.canva = ->
         i = object.addChild.to.length - 1
         while i >= 0
           to_line = object.addChild.to[i]
-          to_line.addChildRemove()
+          to_line.unlink()
           to_line.remove()
           i--
     object.remove()

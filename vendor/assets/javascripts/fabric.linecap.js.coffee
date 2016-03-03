@@ -13,13 +13,18 @@ fabric.Object::boundingRect = ->
   table = @group
   x_offset = if table then table.left else 0
   y_offset = if table then table.top else 0
-  width = if table && @isText() then table.width else @width
+  mod_width = if table && @isText() then table.width else @width
+  mod_height = @height
 
   {
     x: x_offset + @originalLeft
     y: y_offset + @originalTop
-    width: width * @scaleX # are scale needs ?
-    height: @height * @scaleY  # are scale needs ?
+    width: mod_width #* @scaleX # are scale needs ?
+    height: mod_height # * @scaleY  # are scale needs ?
+    center: {
+      x: x_offset + @originalLeft + mod_width / 2
+      y: y_offset + @originalTop + mod_height / 2
+    }
   }
 
 fabric.TableField = fabric.util.createClass(fabric.Text,

@@ -53,12 +53,29 @@ window.canva = ->
   projection_line = undefined
 
 
-  getObjectPoint = (object) ->
+  pointertoRect = (pointer, width = 1, height = 1) ->
+    {
+      x: pointer.x
+      y: pointer.y
+      width: width
+      height: height
+      center: {
+        x: pointer.x + width / 2
+        y: pointer.y + height / 2
+      }
+    }
+
+
+  getObjectPoint = (object, toRect) ->
     res = object.getCenterPoint()
 
     if (object.isText())
       rect = object.boundingRect()
-      res.x = rect.x + rect.width / 2
+
+      rel_center = toRect.center
+      obj_center = rect.center
+
+      res.x = if (rel_center.x <= obj_center.x) then rect.x - 12 else rect.x + rect.width - 10
       res.y = rect.y + rect.height / 2
 
     res
@@ -93,8 +110,8 @@ window.canva = ->
 
 
   registerRelation = (fromObject, toObject) ->
-    from = getObjectPoint(fromObject)
-    to = getObjectPoint(toObject)
+    from = getObjectPoint(fromObject, toObject.boundingRect())
+    to = getObjectPoint(toObject, fromObject.boundingRect())
     line = new (fabric.LineArrow)([
       from.x
       from.y
@@ -155,14 +172,14 @@ window.canva = ->
       if object.addChild
         if object.addChild.from
           object.addChild.from.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.from)
+            objectCenter = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
             line_obj.line.set
               'x1': objectCenter.x
               'y1': objectCenter.y
 
         if object.addChild.to
           object.addChild.to.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.to)
+            objectCenter = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
             line_obj.line.set
               'x2': objectCenter.x
               'y2': objectCenter.y
@@ -205,7 +222,7 @@ window.canva = ->
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)
         to_pointer = canvas.getPointer(options.e)
-        from_pointer = getObjectPoint(canvas.addChild.start)
+        from_pointer = getObjectPoint(canvas.addChild.start, pointertoRect(to_pointer))
 
         if (projection_line)
           projection_line.set

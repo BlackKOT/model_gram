@@ -124,12 +124,12 @@ window.canva = ->
     fromContainer.addChild =
       from: fromContainer.addChild and fromContainer.addChild.from or []
       to: fromContainer.addChild and fromContainer.addChild.to or []
-    fromContainer.addChild.from.push {el: fromObject, line: line}
+    fromContainer.addChild.from.push {from: fromObject, to: toObject, line: line}
 
     toContainer.addChild =
       from: toContainer.addChild and toContainer.addChild.from or []
       to: toContainer.addChild and toContainer.addChild.to or []
-    toContainer.addChild.to.push {el: toObject, line: line}
+    toContainer.addChild.to.push {from: fromObject, to: toObject, line: line}
 
     # to remove line references when the line gets removed
 
@@ -155,14 +155,14 @@ window.canva = ->
       if object.addChild
         if object.addChild.from
           object.addChild.from.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.el)
+            objectCenter = getObjectPoint(line_obj.from)
             line_obj.line.set
               'x1': objectCenter.x
               'y1': objectCenter.y
 
         if object.addChild.to
           object.addChild.to.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.el)
+            objectCenter = getObjectPoint(line_obj.to)
             line_obj.line.set
               'x2': objectCenter.x
               'y2': objectCenter.y

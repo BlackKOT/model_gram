@@ -265,6 +265,8 @@ window.canva = ->
       curr_obj = canvas.getActiveObject();
       if (!curr_obj)
         cancelRelation()
+      else
+        canvas.bringToFront(curr_obj)
     )
 
     canvas.on('mouse:dblclick', (options) ->
@@ -293,6 +295,9 @@ window.canva = ->
       attrs: attrs
       left: 150
       top: 100
+      lockRotation: true
+      lockScalingX: true
+      lockScalingY: true
 #      angle: -10
     })
 

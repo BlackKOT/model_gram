@@ -172,17 +172,25 @@ window.canva = ->
       if object.addChild
         if object.addChild.from
           object.addChild.from.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
+            fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
+            toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
+
             line_obj.line.set
-              'x1': objectCenter.x
-              'y1': objectCenter.y
+              'x1': fromPoint.x
+              'y1': fromPoint.y
+              'x2': toPoint.x
+              'y2': toPoint.y
 
         if object.addChild.to
           object.addChild.to.forEach (line_obj) ->
-            objectCenter = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
+            fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
+            toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
+
             line_obj.line.set
-              'x2': objectCenter.x
-              'y2': objectCenter.y
+              'x1': fromPoint.x
+              'y1': fromPoint.y
+              'x2': toPoint.x
+              'y2': toPoint.y
 
       canvas.renderAll()
     return

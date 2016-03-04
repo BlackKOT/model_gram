@@ -66,21 +66,6 @@ window.canva = ->
     }
 
 
-  getObjectPoint = (object, toRect) ->
-    res = object.getCenterPoint()
-
-    if (object.isText())
-      rect = object.boundingRect()
-
-      rel_center = toRect.center
-      obj_center = rect.center
-
-      res.x = if (rel_center.x <= obj_center.x) then rect.x - 12 else rect.x + rect.width - 12
-      res.y = rect.y + rect.height / 2
-
-    res
-
-
   startRelation = (startObject) ->
     canvas.addChild = start: startObject
     # for when addChild is clicked twice
@@ -113,11 +98,9 @@ window.canva = ->
 
 
   registerRelation = (fromObject, toObject) ->
-    from = getObjectPoint(fromObject, toObject.boundingRect())
-    to = getObjectPoint(toObject, fromObject.boundingRect())
     line = new (fabric.RelArrow)([
-      {x: from.x, y: from.y}
-      {x: to.x, y: to.y}
+      {obj: fromObject, rect: toObject.boundingRect()}
+      {obj: toObject, rect: fromObject.boundingRect()}
     ],
       fill: 'red'
       stroke: 'red'
@@ -173,25 +156,17 @@ window.canva = ->
       if object.addChild
         if object.addChild.from
           object.addChild.from.forEach (line_obj) ->
-            fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
-            toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
-
-            line_obj.line.updateCoords
-              'x1': fromPoint.x
-              'y1': fromPoint.y
-              'x2': toPoint.x
-              'y2': toPoint.y
+            line_obj.line.updateCoords [
+              {obj: line_obj.from, rect: line_obj.to.boundingRect()}
+              {obj: line_obj.to, rect: line_obj.from.boundingRect()}
+            ]
 
         if object.addChild.to
           object.addChild.to.forEach (line_obj) ->
-            fromPoint = getObjectPoint(line_obj.from, line_obj.to.boundingRect())
-            toPoint = getObjectPoint(line_obj.to, line_obj.from.boundingRect())
-
-            line_obj.line.updateCoords
-              'x1': fromPoint.x
-              'y1': fromPoint.y
-              'x2': toPoint.x
-              'y2': toPoint.y
+            line_obj.line.updateCoords [
+              {obj: line_obj.from, rect: line_obj.to.boundingRect()}
+              {obj: line_obj.to, rect: line_obj.from.boundingRect()}
+            ]
 
       canvas.renderAll()
     return
@@ -231,19 +206,18 @@ window.canva = ->
     canvas.on('mouse:move', (options) ->
       if (canvas.addChild && canvas.addChild.start)
         to_pointer = canvas.getPointer(options.e)
-        from_pointer = getObjectPoint(canvas.addChild.start, pointertoRect(to_pointer))
 
         if (projection_line)
-          projection_line.updateCoords
-            'x1': from_pointer.x
-            'y1': from_pointer.y
-            'x2': to_pointer.x
-            'y2': to_pointer.y
+          projection_line.updateCoords [
+            {obj: canvas.addChild.start, rect: pointertoRect(to_pointer)}
+            {obj: to_pointer, rect: canvas.addChild.start.boundingRect()}
+          ]
+
           canvas.renderAll()
         else
           projection_line = new (fabric.RelArrow)([
-            {x: from_pointer.x, y: from_pointer.y}
-            {x: to_pointer.x, y: to_pointer.y}
+            {obj: canvas.addChild.start, rect: pointertoRect(to_pointer)}
+            {obj: to_pointer, rect: canvas.addChild.start.boundingRect()}
           ],
             fill: 'red'
             stroke: 'red'

@@ -127,14 +127,45 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
   initialize: (element, options) ->
     options or (options = {})
-    @points = element
-    @originPoints = element
     @callSuper 'initialize', options
-    @updateBounds()
+    @updateBounds(element)
     return
 
-  updateBounds: ->
+
+  appendObjectPoints: (object, toRect) ->
+    res = if object.name then object.getCenterPoint() else object
+
+    if (object.name && object.isText())
+      rect = object.boundingRect()
+
+      rel_center = toRect.center
+      obj_center = rect.center
+
+      if (rel_center.x <= obj_center.x)
+        res.x = rect.x - 12
+        res.y = rect.y + rect.height / 2
+
+        @originPoints.push({x: res.x, y: res.y})
+        @originPoints.push({x: res.x - 20, y: res.y})
+
+      else
+        res.x = rect.x + rect.width - 12
+        res.y = rect.y + rect.height / 2
+
+        @originPoints.push({x: res.x, y: res.y})
+        @originPoints.push({x: res.x + 20, y: res.y})
+
+    else
+      @originPoints.push({x: res.x, y: res.y})
+
+
+
+  updateBounds: (sets) ->
+    for set in sets
+      @appendObjectPoints(set.obj, set.rect)
+
     @bounds = {l: 9999, t: 9999, r: -9999, b: -9999}
+    @points = []
 
     for point in @originPoints
       @bounds.l = Math.min(@bounds.l, point.x)
@@ -147,19 +178,18 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     h = Math.abs(@bounds.t - @bounds.b) / 2
 
     for i in [0...@originPoints.length]
-      @points[i].x = (@originPoints[i].x - @bounds.l) - w
-      @points[i].y = (@originPoints[i].y - @bounds.t) - h
+      @points.push(
+        x: (@originPoints[i].x - @bounds.l) - w
+        y: (@originPoints[i].y - @bounds.t) - h
+      )
 
     @updateDimensions()
 #    if @canvas
 #      @sendToBack()
 
 
-  updateCoords: (pointsHash) ->
-    @originPoints[0] = {x: pointsHash.x1, y: pointsHash.y1}
-    @originPoints[@originPoints.length - 1] = {x: pointsHash.x2, y: pointsHash.y2}
-    @updateBounds()
-
+  updateCoords: (sets) ->
+    @updateBounds(sets)
 
 
   updateDimensions: ->

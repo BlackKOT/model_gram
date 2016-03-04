@@ -119,40 +119,55 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 )
 
 
-fabric.RelArrow = fabric.util.createClass(fabric.Polyline,
+fabric.RelArrow = fabric.util.createClass(fabric.Object,
   type: 'relArrow'
-  bounds: {l: 9999, t: 9999, r: -9999, b: -9999}
+  bounds: {}
+  points: []
+  originPoints: []
 
   initialize: (element, options) ->
     options or (options = {})
+    @points = element
+    @originPoints = element
     @callSuper 'initialize', element, options
     @updateBounds()
     return
 
   updateBounds: ->
-    for point in @points
+    @bounds = {l: 9999, t: 9999, r: -9999, b: -9999}
+
+    for point in @originPoints
       @bounds.l = Math.min(@bounds.l, point.x)
       @bounds.r = Math.max(@bounds.r, point.x)
 
       @bounds.t = Math.min(@bounds.t, point.y)
       @bounds.b = Math.max(@bounds.b, point.y)
 
+    w = Math.abs(@bounds.l - @bounds.r) / 2
+    h = Math.abs(@bounds.t - @bounds.b) / 2
+
+    for i in [0...@originPoints.length]
+      @points[i].x = (@originPoints[i].x - @bounds.l) - w
+      @points[i].y = (@originPoints[i].y - @bounds.t) - h
+
+    @updateDimensions()
+#    if @canvas
+#      @sendToBack()
+
 
   updateCoords: (pointsHash) ->
-    @points[0] = {x: pointsHash.x1, y: pointsHash.y1}
-    @points[@points.length - 1] = {x: pointsHash.x2, y: pointsHash.y2}
+    @originPoints[0] = {x: pointsHash.x1, y: pointsHash.y1}
+    @originPoints[@originPoints.length - 1] = {x: pointsHash.x2, y: pointsHash.y2}
     @updateBounds()
 
 
 
-
-#  updateDimensions: ->
-#    dims = @_parseDimensions()
-#    @setWidth(dims.width)
-#    @setHeight(dims.height)
-#    @pathOffset.x = @width / 2
-#    @pathOffset.y = @height / 2
-#    @setCoords()
+  updateDimensions: ->
+    @setLeft(@bounds.l)
+    @setTop(@bounds.t)
+    @setWidth(Math.abs(@bounds.l - @bounds.r))
+    @setHeight(Math.abs(@bounds.t - @bounds.b))
+    @setCoords()
 
 
   toObject: ->
@@ -160,7 +175,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Polyline,
   _render: (ctx) ->
 #    @callSuper '_render', ctx
     # do not render if width/height are zeros or object is not visible
-    console.log(@points)
+
     if !@visible
       return
 #

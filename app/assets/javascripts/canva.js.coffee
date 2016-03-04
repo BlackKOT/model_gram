@@ -132,7 +132,7 @@ window.canva = ->
 
     canvas.add line
     # so that the line is behind the connected shapes
-    #    line.sendToBack()
+    line.sendToBack()
     # add a reference to the line to each object
 
     fromContainer = if fromObject.group then fromObject.group else fromObject

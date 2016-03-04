@@ -146,12 +146,12 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
       if (rel_center.x <= obj_center.x)
         res.x = rect.x - 12
-        res.y = rect.y + rect.height / 2
         offset = -20
       else
         res.x = rect.x + rect.width - 12
-        res.y = rect.y + rect.height / 2
         offset = 20
+
+      res.y = rect.y + rect.height / 2
 
       if add_offset
         if add_offset == 1
@@ -160,11 +160,10 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
         else
           @originPoints.push({x: res.x + offset, y: res.y})
           @originPoints.push({x: res.x, y: res.y})
-      else
-        @originPoints.push({x: res.x, y: res.y})
 
-    else
-      @originPoints.push({x: res.x, y: res.y})
+        return
+
+    @originPoints.push({x: res.x, y: res.y})
 
 
   updateBounds: (sets) ->
@@ -178,8 +177,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
         sets[i].rect,
         if i == 0 then 1 else if i == (sets.length - 1) then 2 else undefined
       )
-
-    console.log(@originPoints)
 
     for point in @originPoints
       @bounds.l = Math.min(@bounds.l, point.x)
@@ -203,7 +200,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   updateCoords: (sets) ->
-    console.log(sets)
     @updateBounds(sets)
 
 
@@ -241,14 +237,15 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     yDiff = point2.y - point1.y
 
     angle = Math.atan2(yDiff, xDiff)
-    ctx.translate xDiff / 2, yDiff / 2
+    ctx.translate point2.x, point2.y
     ctx.rotate angle
+
     ctx.beginPath()
-    #move 10px in front of line to start the arrow so it does not have the square line end showing in front (0,0)
     ctx.moveTo 5, 0
     ctx.lineTo -10, 8
     ctx.lineTo -10, -8
     ctx.closePath()
+
     ctx.fillStyle = @stroke
     ctx.fill()
     ctx.restore()

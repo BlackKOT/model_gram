@@ -182,11 +182,12 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 #
     ctx.save()
 
+    ctx.beginPath()
     ctx.moveTo @points[0].x, @points[0].y
     for point in @points[1...]
       ctx.lineTo point.x, point.y
 
-    ctx.stroke();
+    ctx.stroke()
 
     point2 = @points[@points.length - 1]
     point1 = @points[@points.length - 2]

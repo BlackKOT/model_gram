@@ -129,7 +129,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     options or (options = {})
     @points = element
     @originPoints = element
-    @callSuper 'initialize', element, options
+    @callSuper 'initialize', options
     @updateBounds()
     return
 
@@ -163,10 +163,10 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   updateDimensions: ->
-    @setLeft(@bounds.l)
-    @setTop(@bounds.t)
-    @setWidth(Math.abs(@bounds.l - @bounds.r))
-    @setHeight(Math.abs(@bounds.t - @bounds.b))
+    @setLeft(@bounds.l + 5)
+    @setTop(@bounds.t + 5)
+    @setWidth(Math.abs(@bounds.l - @bounds.r) - 10)
+    @setHeight(Math.abs(@bounds.t - @bounds.b) - 10)
     @setCoords()
 
 

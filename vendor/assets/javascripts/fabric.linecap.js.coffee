@@ -132,40 +132,54 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     return
 
 
-  appendObjectPoints: (object, toRect) ->
+  appendObjectPoints: (object, toRect, add_offset) ->
+#    console.log(toRect, object)
+
     res = if object.name then object.getCenterPoint() else object
 
-    if (object.name && object.isText())
+    if (object.isText && object.isText())
       rect = object.boundingRect()
 
       rel_center = toRect.center
       obj_center = rect.center
+      offset = 0
 
       if (rel_center.x <= obj_center.x)
         res.x = rect.x - 12
         res.y = rect.y + rect.height / 2
-
-        @originPoints.push({x: res.x, y: res.y})
-        @originPoints.push({x: res.x - 20, y: res.y})
-
+        offset = -20
       else
         res.x = rect.x + rect.width - 12
         res.y = rect.y + rect.height / 2
+        offset = 20
 
+      if add_offset
+        if add_offset == 1
+          @originPoints.push({x: res.x, y: res.y})
+          @originPoints.push({x: res.x + offset, y: res.y})
+        else
+          @originPoints.push({x: res.x + offset, y: res.y})
+          @originPoints.push({x: res.x, y: res.y})
+      else
         @originPoints.push({x: res.x, y: res.y})
-        @originPoints.push({x: res.x + 20, y: res.y})
 
     else
       @originPoints.push({x: res.x, y: res.y})
 
 
-
   updateBounds: (sets) ->
-    for set in sets
-      @appendObjectPoints(set.obj, set.rect)
-
+    @originPoints = []
     @bounds = {l: 9999, t: 9999, r: -9999, b: -9999}
     @points = []
+
+    for i in [0...sets.length]
+      @appendObjectPoints(
+        sets[i].obj,
+        sets[i].rect,
+        if i == 0 then 1 else if i == (sets.length - 1) then 2 else undefined
+      )
+
+    console.log(@originPoints)
 
     for point in @originPoints
       @bounds.l = Math.min(@bounds.l, point.x)
@@ -189,6 +203,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   updateCoords: (sets) ->
+    console.log(sets)
     @updateBounds(sets)
 
 

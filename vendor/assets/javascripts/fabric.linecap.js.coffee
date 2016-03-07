@@ -28,7 +28,7 @@ fabric.Object::boundingRect = ->
     height: mod_height # * @scaleY  # are scale needs ?
     center: {
       x: x_offset + @originalLeft + mod_width / 2
-      y: y_offset + @originalTop + mod_height / 2
+      y: (y_offset + @originalTop + mod_height / 2)
     }
   }
 
@@ -156,7 +156,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
         res.x = rect.x + rect.width - 12
         offset = @tail_width
 
-      res.y = rect.y + rect.height / 2
+      res.y = rect.y + rect.height / 2 - 4 # - 4 is text padding
 
       if add_offset
         if add_offset == 1
@@ -206,7 +206,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     @updateBounds(sets)
 
 
-  updateDimensions: ->
+  updateDimensions: -> # add paddings
     @setLeft(@bounds.l + 5)
     @setTop(@bounds.t + 5)
     @setWidth(Math.abs(@bounds.l - @bounds.r) - 10)
@@ -215,7 +215,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   drawCap: (ctx, capType, point1, point2) ->
-
     xDiff = point2.x - point1.x
     yDiff = point2.y - point1.y
 

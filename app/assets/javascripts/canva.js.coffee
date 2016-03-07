@@ -69,6 +69,7 @@ window.canva = ->
 
   proceedRelationsList = (rels) ->
     for table_name, table_rels of rels
+      console.log(table_name, table_rels)
       main_table = tables[table_name]
       unless main_table
         console.error(table_name + ' is not exists in tables hash')
@@ -101,7 +102,7 @@ window.canva = ->
 
                 back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
                 # back relation is excluded from hash for preventing duplications of relations
-                rels[rel_table_name][table_name] = undefined
+                delete rels[rel_table_name][table_name]
 
             unless (main_table_field)
               console.error("#{(rel_params.foreign_key || 'id')} is not finded in table #{rel_table_name}")

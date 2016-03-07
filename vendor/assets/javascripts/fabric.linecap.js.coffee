@@ -88,13 +88,13 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 
     group_elements = [rect, table_name, table_field_line]
 
-    for field in element.attrs.fields
+    for fname, params of element.attrs.attributes
       table_field_line = new fabric.Line([0, start_y, element.min_table_width, start_y], {
         fill: 'rgba(0,0,0,0)'
         stroke: 'black'
         strokeWidth: 1
       })
-      table_field_text = new fabric.TableField(field.name, {
+      table_field_text = new fabric.TableField(fname, {
         left: start_x
         top: start_y + 4
         fontSize: 18

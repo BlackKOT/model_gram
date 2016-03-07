@@ -51,6 +51,7 @@ window.canva = ->
   min_table_height = 120
   canvas = undefined
   projection_line = undefined
+  tables = {}
 
 
   pointertoRect = (pointer, width = 1, height = 1) ->
@@ -260,6 +261,9 @@ window.canva = ->
     resize()
 
 
+  spacingTables = ->
+
+
 
   addTable = (attrs) ->
     table = new fabric.Table({
@@ -275,15 +279,7 @@ window.canva = ->
     })
 
     canvas.add(table)
-
-#    group.addWithUpdate(new fabric.Rect({
-#      width: 20,
-#      height: 20,
-#      fill: 'yellow',
-#      left: group.get('left'),
-#      top: group.get('top')
-#    }));
-
+    tables[attrs.table_name] = table
 
 
   removeTable = (name) ->
@@ -311,4 +307,5 @@ window.canva = ->
   return {
     init: init
     addTable: addTable
+    spacingTables: spacingTables
   }

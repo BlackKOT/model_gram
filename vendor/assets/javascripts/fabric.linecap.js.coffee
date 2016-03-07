@@ -124,6 +124,8 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
   bounds: {}
   points: []
   originPoints: []
+  rel_start_type: 'arrow'
+  rel_end_type: 'arrow'
 
   initialize: (element, options) ->
     options or (options = {})
@@ -211,6 +213,29 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     @setCoords()
 
 
+  drawCap: (ctx, capType, point1, point2) ->
+    switch capType
+      when 'arrow'
+        ctx.save()
+        xDiff = point2.x - point1.x
+        yDiff = point2.y - point1.y
+
+        angle = Math.atan2(yDiff, xDiff)
+        ctx.translate point2.x, point2.y
+        ctx.rotate angle
+
+        ctx.beginPath()
+        ctx.moveTo 5, 0
+        ctx.lineTo -10, 8
+        ctx.lineTo -10, -8
+        ctx.closePath()
+
+        ctx.fillStyle = @stroke
+        ctx.fill()
+        ctx.restore()
+
+
+
   toObject: ->
     fabric.util.object.extend @callSuper('toObject')
   _render: (ctx) ->
@@ -219,8 +244,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
     if !@visible
       return
-#
-#
+
     ctx.save()
 
     ctx.beginPath()
@@ -229,25 +253,11 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       ctx.lineTo point.x, point.y
 
     ctx.stroke()
+    ctx.restore()
 
-    point2 = @points[@points.length - 1]
-    point1 = @points[@points.length - 2]
+    @drawCap(ctx, @rel_start_type, @points[1], @points[0])
+    @drawCap(ctx, @rel_end_type, @points[@points.length - 2], @points[@points.length - 1])
 
-    xDiff = point2.x - point1.x
-    yDiff = point2.y - point1.y
-
-    angle = Math.atan2(yDiff, xDiff)
-    ctx.translate point2.x, point2.y
-    ctx.rotate angle
-
-    ctx.beginPath()
-    ctx.moveTo 5, 0
-    ctx.lineTo -10, 8
-    ctx.lineTo -10, -8
-    ctx.closePath()
-
-    ctx.fillStyle = @stroke
-    ctx.fill()
     ctx.restore()
     return
 )

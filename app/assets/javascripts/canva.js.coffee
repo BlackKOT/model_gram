@@ -82,29 +82,31 @@ window.canva = ->
               console.error('Relation ' + rel_table_name + ' did not has relation params')
               continue
 
-            main_table_field = main_table.findFieldByName(rel_params.foreign_key || 'id')
+            console.warn(rel_table_name, rel_params.foreign_key)
+            main_table_field = rel_table.findFieldByName(rel_params.foreign_key || 'id')
 
             back_rel_type = cap_styles.none
-            rel_table_field = rel_table
+            rel_table_field = main_table
 
             if rels[rel_table_name] &&
               rels[rel_table_name][table_name] &&
               rels[rel_table_name][table_name].rel_type
-                rel_table_field = rel_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+                rel_table_field = main_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
 
                 unless (rel_table_field)
-                  console.error((rels[rel_table_name][table_name].foreign_key || 'id') + ' is not finded')
-                  rel_table_field = rel_table
+                  console.error(
+                    "#{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{table_name}"
+                  )
+                  rel_table_field = main_table
 
                 back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
                 # back relation is excluded from hash for preventing duplications of relations
                 rels[rel_table_name][table_name] = undefined
 
             unless (main_table_field)
-              console.error((rel_params.foreign_key || 'id') + ' is not finded')
-              main_table_field = main_table
+              console.error("#{(rel_params.foreign_key || 'id')} is not finded in table #{rel_table_name}")
+              main_table_field = rel_table
 
-            console.log(main_table_field, rel_table_field)
             registerRelation(main_table_field, rel_table_field, back_rel_type, cap_styles[rel_params.rel_type])
 
 

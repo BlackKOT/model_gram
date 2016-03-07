@@ -1,5 +1,7 @@
 #= require fabric.min
 
+window.cap_styles = {arrow: 1, mandatory: 2, has_many: 4, non_mandatory: 8}
+
 fabric.Object::isText = ->
   @get('type') == 'text' || @get('type') == 'table_field'
 
@@ -124,8 +126,11 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
   bounds: {}
   points: []
   originPoints: []
-  rel_start_type: 'arrow'
-  rel_end_type: 'arrow'
+  rel_start_type: cap_styles.non_mandatory | cap_styles.arrow
+  rel_end_type: cap_styles.mandatory | cap_styles.has_many
+  tail_width: 20
+  tail_height: 8
+
 
   initialize: (element, options) ->
     options or (options = {})
@@ -135,8 +140,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   appendObjectPoints: (object, toRect, add_offset) ->
-#    console.log(toRect, object)
-
     res = if object.name then object.getCenterPoint() else object
 
     if (object.isText && object.isText())
@@ -148,10 +151,10 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
       if (rel_center.x <= obj_center.x)
         res.x = rect.x - 12
-        offset = -20
+        offset = -@tail_width
       else
         res.x = rect.x + rect.width - 12
-        offset = 20
+        offset = @tail_width
 
       res.y = rect.y + rect.height / 2
 
@@ -197,8 +200,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       )
 
     @updateDimensions()
-#    if @canvas
-#      @sendToBack()
 
 
   updateCoords: (sets) ->
@@ -214,26 +215,60 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
 
   drawCap: (ctx, capType, point1, point2) ->
-    switch capType
-      when 'arrow'
-        ctx.save()
-        xDiff = point2.x - point1.x
-        yDiff = point2.y - point1.y
 
-        angle = Math.atan2(yDiff, xDiff)
-        ctx.translate point2.x, point2.y
-        ctx.rotate angle
+    xDiff = point2.x - point1.x
+    yDiff = point2.y - point1.y
 
-        ctx.beginPath()
-        ctx.moveTo 5, 0
-        ctx.lineTo -10, 8
-        ctx.lineTo -10, -8
-        ctx.closePath()
+    angle = Math.atan2(yDiff, xDiff)
 
-        ctx.fillStyle = @stroke
-        ctx.fill()
-        ctx.restore()
+    if capType & cap_styles.arrow
+      ctx.save()
+      ctx.translate point2.x, point2.y
+      ctx.rotate angle
+      ctx.beginPath()
+      ctx.moveTo 2, 0
+      ctx.lineTo -@tail_width / 2, @tail_height
+      ctx.lineTo -@tail_width / 2, -@tail_height
+      ctx.closePath()
+      ctx.fillStyle = @stroke
+      ctx.fill()
+      ctx.restore()
 
+    if capType & cap_styles.mandatory
+      ctx.save()
+      ctx.translate point2.x, point2.y
+      ctx.rotate angle
+      ctx.beginPath()
+      ctx.moveTo -@tail_width / 2, @tail_height
+      ctx.lineTo -@tail_width / 2, -@tail_height
+      ctx.strokeStyle = @stroke
+      ctx.stroke()
+      ctx.restore()
+
+    if capType & cap_styles.non_mandatory
+      ctx.save()
+      ctx.translate point2.x, point2.y
+      ctx.rotate angle
+      ctx.beginPath()
+      ctx.arc -@tail_width / 1.2, 0, @tail_width / 4, 0, 2 * Math.PI, false
+      ctx.strokeStyle = @stroke
+      ctx.stroke()
+      ctx.fillStyle = 'rgba(255,255,255,255)'
+      ctx.fill()
+      ctx.restore()
+
+    if capType & cap_styles.has_many
+      ctx.save()
+      ctx.translate point2.x, point2.y
+      ctx.rotate angle
+      ctx.beginPath()
+      ctx.moveTo -@tail_width / 2, 0
+      ctx.lineTo 0, @tail_height
+      ctx.moveTo -@tail_width / 2, 0
+      ctx.lineTo 0, -@tail_height
+      ctx.strokeStyle = @stroke
+      ctx.stroke()
+      ctx.restore()
 
 
   toObject: ->
@@ -258,7 +293,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     @drawCap(ctx, @rel_start_type, @points[1], @points[0])
     @drawCap(ctx, @rel_end_type, @points[@points.length - 2], @points[@points.length - 1])
 
-    ctx.restore()
     return
 )
 

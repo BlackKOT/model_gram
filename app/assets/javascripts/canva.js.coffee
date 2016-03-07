@@ -66,6 +66,10 @@ window.canva = ->
     }
 
 
+  beganRelation = ->
+    canvas.addChild && canvas.addChild.start
+
+
   startRelation = (startObject) ->
     canvas.addChild = start: startObject
     # for when addChild is clicked twice
@@ -104,7 +108,7 @@ window.canva = ->
     ],
       fill: 'red'
       stroke: 'red'
-      strokeWidth: 4
+      strokeWidth: 3
       selectable: true
       lockMovementX: true
       lockMovementY: true
@@ -204,7 +208,7 @@ window.canva = ->
 #    )
 
     canvas.on('mouse:move', (options) ->
-      if (canvas.addChild && canvas.addChild.start)
+      if (beganRelation())
         to_pointer = canvas.getPointer(options.e)
 
         if (projection_line)
@@ -221,7 +225,7 @@ window.canva = ->
           ],
             fill: 'red'
             stroke: 'red'
-            strokeWidth: 2
+            strokeWidth: 1
             selectable: false
           )
           canvas.add projection_line
@@ -234,7 +238,7 @@ window.canva = ->
       curr_obj = canvas.getActiveObject();
       if (!curr_obj)
         cancelRelation()
-      else
+      else unless(beganRelation())
         canvas.bringToFront(curr_obj)
     )
 

@@ -83,22 +83,23 @@ window.canva = ->
               console.error('Relation ' + rel_table_name + ' did not has relation params')
               continue
 
-            console.warn(rel_table_name, rel_params.foreign_key)
-            main_table_field = rel_table.findFieldByName(rel_params.foreign_key || 'id')
+            console.warn(table_name, rel_params.foreign_key)
+            main_table_field = main_table.findFieldByName(rel_params.foreign_key || 'id')
 
             back_rel_type = cap_styles.none
-            rel_table_field = main_table
+            rel_table_field = rel_table
 
             if rels[rel_table_name] &&
               rels[rel_table_name][table_name] &&
               rels[rel_table_name][table_name].rel_type
-                rel_table_field = main_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+                console.warn(rel_table_name, rels[rel_table_name][table_name].foreign_key)
+                rel_table_field = rel_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
 
                 unless (rel_table_field)
                   console.error(
                     "#{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{table_name}"
                   )
-                  rel_table_field = main_table
+                  rel_table_field = rel_table
 
                 back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
                 # back relation is excluded from hash for preventing duplications of relations
@@ -106,9 +107,9 @@ window.canva = ->
 
             unless (main_table_field)
               console.error("#{(rel_params.foreign_key || 'id')} is not finded in table #{rel_table_name}")
-              main_table_field = rel_table
+              main_table_field = main_table
 
-            registerRelation(main_table_field, rel_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+            registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
 
 
   isRelationBegan = ->

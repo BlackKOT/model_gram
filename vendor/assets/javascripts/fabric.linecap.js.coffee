@@ -1,6 +1,6 @@
 #= require fabric.min
 
-window.cap_styles = {arrow: 1, mandatory: 2, has_many: 4, non_mandatory: 8}
+window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16}
 
 fabric.Object::isText = ->
   @get('type') == 'text' || @get('type') == 'table_field'
@@ -36,6 +36,7 @@ fabric.TableField = fabric.util.createClass(fabric.Text,
   type: 'table_field'
   initialize: (element, options) ->
     @callSuper 'initialize', element, options
+    @name = element
     return
 
   toObject: ->
@@ -118,6 +119,17 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 
   toObject: ->
     fabric.util.object.extend @callSuper('toObject')
+
+  findFieldByName: (name) ->
+    i = @size()
+    while i--
+      item = @item(i)
+
+      if (item.isTableField())
+        if item.name and item.name == name
+          return item
+
+    undefined
 )
 
 
@@ -126,14 +138,18 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
   bounds: {}
   points: []
   originPoints: []
-  rel_start_type: cap_styles.non_mandatory | cap_styles.arrow
-  rel_end_type: cap_styles.mandatory | cap_styles.has_many
+  rel_start_type: cap_styles.none
+  rel_end_type: cap_styles.none
   tail_width: 20
   tail_height: 8
 
 
   initialize: (element, options) ->
     options or (options = {})
+
+    @rel_start_type = if options.start_cap then options.start_cap else (cap_styles.non_mandatory | cap_styles.belongs_to)
+    @rel_end_type = if options.end_cap then options.end_cap else (cap_styles.mandatory | cap_styles.has_many)
+
     @callSuper 'initialize', options
     @updateBounds(element)
     return
@@ -220,7 +236,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
     angle = Math.atan2(yDiff, xDiff)
 
-    if capType & cap_styles.arrow
+    if capType & cap_styles.belongs_to
       ctx.save()
       ctx.translate point2.x, point2.y
       ctx.rotate angle
@@ -229,6 +245,8 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       ctx.lineTo -@tail_width / 2, @tail_height
       ctx.lineTo -@tail_width / 2, -@tail_height
       ctx.closePath()
+#      ctx.strokeStyle = @stroke
+#      ctx.stroke()
       ctx.fillStyle = @stroke
       ctx.fill()
       ctx.restore()

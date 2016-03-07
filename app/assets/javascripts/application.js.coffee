@@ -14,4 +14,6 @@ $ ->
       attributes: table_attrs.attributes
     )
 
+  canvas.proceedRelationsList window.grid_data.rels
+
   canvas.spacingTables()

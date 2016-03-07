@@ -67,7 +67,48 @@ window.canva = ->
     }
 
 
-  beganRelation = ->
+  proceedRelationsList = (rels) ->
+    for table_name, table_rels of rels
+      main_table = tables[table_name]
+      unless main_table
+        console.error(table_name + ' is not exists in tables hash')
+      else
+        for rel_table_name, rel_params of table_rels
+          rel_table = tables[rel_table_name]
+          unless rel_table
+            console.error(rel_table_name + ' is not exists in tables hash')
+          else
+            unless rel_params
+              console.error('Relation ' + rel_table_name + ' did not has relation params')
+              continue
+
+            main_table_field = main_table.findFieldByName(rel_params.foreign_key || 'id')
+
+            back_rel_type = cap_styles.none
+            rel_table_field = rel_table
+
+            if rels[rel_table_name] &&
+              rels[rel_table_name][table_name] &&
+              rels[rel_table_name][table_name].rel_type
+                rel_table_field = rel_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+
+                unless (rel_table_field)
+                  console.error((rels[rel_table_name][table_name].foreign_key || 'id') + ' is not finded')
+                  rel_table_field = rel_table
+
+                back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
+                # back relation is excluded from hash for preventing duplications of relations
+                rels[rel_table_name][table_name] = undefined
+
+            unless (main_table_field)
+              console.error((rel_params.foreign_key || 'id') + ' is not finded')
+              main_table_field = main_table
+
+            console.log(main_table_field, rel_table_field)
+            registerRelation(main_table_field, rel_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+
+
+  isRelationBegan = ->
     canvas.addChild && canvas.addChild.start
 
 
@@ -102,11 +143,13 @@ window.canva = ->
     return
 
 
-  registerRelation = (fromObject, toObject) ->
+  registerRelation = (fromObject, toObject, start_cap = cap_styles.has_many, end_cap = cap_styles.belongs_to) ->
     line = new (fabric.RelArrow)([
       {obj: fromObject, rect: toObject.boundingRect()}
       {obj: toObject, rect: fromObject.boundingRect()}
     ],
+      start_cap: start_cap
+      end_cap: end_cap
       fill: 'red'
       stroke: 'red'
       strokeWidth: 3
@@ -209,7 +252,7 @@ window.canva = ->
 #    )
 
     canvas.on('mouse:move', (options) ->
-      if (beganRelation())
+      if (isRelationBegan())
         to_pointer = canvas.getPointer(options.e)
 
         if (projection_line)
@@ -239,7 +282,7 @@ window.canva = ->
       curr_obj = canvas.getActiveObject();
       if (!curr_obj)
         cancelRelation()
-      else unless(beganRelation())
+      else unless(isRelationBegan())
         canvas.bringToFront(curr_obj)
     )
 
@@ -262,7 +305,7 @@ window.canva = ->
 
 
   spacingTables = ->
-
+    #write me :)
 
 
   addTable = (attrs) ->
@@ -308,4 +351,5 @@ window.canva = ->
     init: init
     addTable: addTable
     spacingTables: spacingTables
+    proceedRelationsList: proceedRelationsList
   }

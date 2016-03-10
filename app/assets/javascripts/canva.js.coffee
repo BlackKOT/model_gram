@@ -83,8 +83,10 @@ window.canva = ->
               console.error('Relation ' + rel_table_name + ' did not has relation params')
               continue
 
-            console.warn(table_name, rel_params.foreign_key)
-            main_table_field = main_table.findFieldByName(rel_params.foreign_key || 'id')
+            main_table_field = if (rel_params.rel_type == 'belongs_to') then rel_table else main_table
+
+            console.warn('! ', main_table_field.name, rel_params.foreign_key)
+            main_table_field = main_table_field.findFieldByName(rel_params.foreign_key || 'id')
 
             back_rel_type = cap_styles.none
             rel_table_field = rel_table
@@ -92,12 +94,14 @@ window.canva = ->
             if rels[rel_table_name] &&
               rels[rel_table_name][table_name] &&
               rels[rel_table_name][table_name].rel_type
-                console.warn(rel_table_name, rels[rel_table_name][table_name].foreign_key)
-                rel_table_field = rel_table.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+
+                rel_table_field = if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
+                console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].foreign_key)
+                rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
 
                 unless (rel_table_field)
                   console.error(
-                    "#{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{table_name}"
+                    "@ #{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{rel_table_name}"
                   )
                   rel_table_field = rel_table
 
@@ -106,7 +110,7 @@ window.canva = ->
                 delete rels[rel_table_name][table_name]
 
             unless (main_table_field)
-              console.error("#{(rel_params.foreign_key || 'id')} is not finded in table #{rel_table_name}")
+              console.error("! #{(rel_params.foreign_key || 'id')} is not finded in table #{table_name}")
               main_table_field = main_table
 
             registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])

@@ -98,7 +98,6 @@ window.canva = ->
 
 
           if back_rel_type
-            rel_table_field = if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
             console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].foreign_key)
             rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
 

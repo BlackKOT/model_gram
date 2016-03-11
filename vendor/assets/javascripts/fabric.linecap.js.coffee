@@ -112,10 +112,11 @@ fabric.Table = fabric.util.createClass(fabric.Group,
       start_y += text_height
 
 
-    rect.set({ width: max_width, height: start_y })
-    for obj in group_elements
-      if !obj.isText()
-        obj.set({ width: max_width })
+    if (max_width > element.min_table_width)
+      rect.set({ width: max_width, height: start_y })
+      for obj in group_elements
+        if !obj.isText()
+          obj.set({ width: max_width })
 
     ##########################################################
 

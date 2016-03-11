@@ -88,22 +88,16 @@ window.canva = ->
           back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&
             rels[rel_table_name][table_name].rel_type
 
-
-          if (rel_params.rel_type == 'belongs_to' || back_rel_type == 'belongs_to')
-            main_table_field = rel_table
-            rel_table_field = main_table
-          else
-            main_table_field = main_table
-            rel_table_field = rel_table
-
+          main_table_field = rel_table #if (rel_params.rel_type == 'belongs_to') then rel_table else main_table
+          rel_table_field = main_table #if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
 
           if back_rel_type
-            console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].foreign_key)
-            rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+            console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].key)
+            rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].key || 'id')
 
             unless (rel_table_field)
               console.error(
-                "@ #{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{rel_table_name}"
+                "@ #{(rels[rel_table_name][table_name].key || 'id')} is not finded in table #{rel_table_name}"
               )
               rel_table_field = rel_table
 
@@ -113,11 +107,11 @@ window.canva = ->
           else
             back_rel_type = cap_styles.none
 
-          console.warn('! ', main_table_field.name, rel_params.foreign_key)
-          main_table_field = main_table_field.findFieldByName(rel_params.foreign_key || 'id')
+          console.warn('! ', main_table_field.name, rel_params.key)
+          main_table_field = main_table_field.findFieldByName(rel_params.key || 'id')
 
           unless (main_table_field)
-            console.error("! #{(rel_params.foreign_key || 'id')} is not finded in table #{table_name}")
+            console.error("! #{(rel_params.key || 'id')} is not finded in table #{table_name}")
             main_table_field = main_table
 
           registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
@@ -165,8 +159,6 @@ window.canva = ->
     ],
       start_cap: start_cap
       end_cap: end_cap
-      fill: 'red'
-      stroke: 'red'
       strokeWidth: 3
       selectable: true
       lockMovementX: true
@@ -282,8 +274,6 @@ window.canva = ->
             {obj: canvas.addChild.start, rect: pointertoRect(to_pointer)}
             {obj: to_pointer, rect: canvas.addChild.start.boundingRect()}
           ],
-            fill: 'red'
-            stroke: 'red'
             strokeWidth: 1
             selectable: false
           )

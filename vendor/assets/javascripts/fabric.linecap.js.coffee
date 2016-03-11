@@ -1,6 +1,7 @@
 #= require fabric.min
 
-window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16}
+window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16, transitional: 32}
+window.cap_styles.through = cap_styles.transitional | cap_styles.has_many
 
 fabric.Object::isText = ->
   @get('type') == 'text' || @get('type') == 'table_field'
@@ -283,6 +284,8 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       ctx.lineTo 0, @tail_height
       ctx.moveTo -@tail_width / 2, 0
       ctx.lineTo 0, -@tail_height
+      ctx.moveTo -@tail_width / 2, 0
+      ctx.lineTo 0, 0
       ctx.strokeStyle = @stroke
       ctx.stroke()
       ctx.restore()
@@ -298,6 +301,14 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       return
 
     ctx.save()
+
+    if @rel_start_type & cap_styles.transitional || @rel_end_type & cap_styles.transitional
+      @fill = 'blue'
+      @stroke = 'blue'
+      ctx.setLineDash([5, 5])
+    else
+      @fill = 'red'
+      @stroke = 'red'
 
     ctx.beginPath()
     ctx.moveTo @points[0].x, @points[0].y

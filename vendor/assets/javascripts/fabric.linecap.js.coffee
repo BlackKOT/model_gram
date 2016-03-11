@@ -1,6 +1,6 @@
 #= require fabric.min
 
-window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16, transitional: 32}
+window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16, transitional: 32, has_one: 64}
 window.cap_styles.through = cap_styles.transitional | cap_styles.has_many
 
 fabric.Object::isText = ->
@@ -288,6 +288,18 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       ctx.lineTo 0, 0
       ctx.strokeStyle = @stroke
       ctx.stroke()
+      ctx.restore()
+
+    if capType & cap_styles.has_one
+      ctx.save()
+      ctx.translate point2.x, point2.y
+      ctx.rotate angle
+      ctx.beginPath()
+      ctx.arc -@tail_width / 2, 0, @tail_width / 2, 0, 2 * Math.PI, false
+      ctx.strokeStyle = @stroke
+      ctx.stroke()
+      ctx.fillStyle = 'rgba(0,255,0,255)'
+      ctx.fill()
       ctx.restore()
 
 

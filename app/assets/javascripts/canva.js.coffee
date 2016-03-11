@@ -76,44 +76,52 @@ window.canva = ->
       else
         for rel_table_name, rel_params of table_rels
           rel_table = tables[rel_table_name]
+
           unless rel_table
             console.error(rel_table_name + ' is not exists in tables hash')
+            continue
+
+          unless rel_params
+            console.error('Relation ' + rel_table_name + ' did not has relation params')
+            continue
+
+          back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&
+            rels[rel_table_name][table_name].rel_type
+
+
+          if (rel_params.rel_type == 'belongs_to' || back_rel_type == 'belongs_to')
+            main_table_field = rel_table
+            rel_table_field = main_table
           else
-            unless rel_params
-              console.error('Relation ' + rel_table_name + ' did not has relation params')
-              continue
-
-            main_table_field = if (rel_params.rel_type == 'belongs_to') then rel_table else main_table
-
-            console.warn('! ', main_table_field.name, rel_params.foreign_key)
-            main_table_field = main_table_field.findFieldByName(rel_params.foreign_key || 'id')
-
-            back_rel_type = cap_styles.none
+            main_table_field = main_table
             rel_table_field = rel_table
 
-            if rels[rel_table_name] &&
-              rels[rel_table_name][table_name] &&
-              rels[rel_table_name][table_name].rel_type
 
-                rel_table_field = if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
-                console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].foreign_key)
-                rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
+          if back_rel_type
+            rel_table_field = if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
+            console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].foreign_key)
+            rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].foreign_key || 'id')
 
-                unless (rel_table_field)
-                  console.error(
-                    "@ #{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{rel_table_name}"
-                  )
-                  rel_table_field = rel_table
+            unless (rel_table_field)
+              console.error(
+                "@ #{(rels[rel_table_name][table_name].foreign_key || 'id')} is not finded in table #{rel_table_name}"
+              )
+              rel_table_field = rel_table
 
-                back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
-                # back relation is excluded from hash for preventing duplications of relations
-                delete rels[rel_table_name][table_name]
+            back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
+            # back relation is excluded from hash for preventing duplications of relations
+            delete rels[rel_table_name][table_name]
+          else
+            back_rel_type = cap_styles.none
 
-            unless (main_table_field)
-              console.error("! #{(rel_params.foreign_key || 'id')} is not finded in table #{table_name}")
-              main_table_field = main_table
+          console.warn('! ', main_table_field.name, rel_params.foreign_key)
+          main_table_field = main_table_field.findFieldByName(rel_params.foreign_key || 'id')
 
-            registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+          unless (main_table_field)
+            console.error("! #{(rel_params.foreign_key || 'id')} is not finded in table #{table_name}")
+            main_table_field = main_table
+
+          registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
 
 
   isRelationBegan = ->

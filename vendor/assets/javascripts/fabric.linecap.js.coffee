@@ -47,6 +47,8 @@ fabric.TableField = fabric.util.createClass(fabric.Text,
 
 fabric.Table = fabric.util.createClass(fabric.Group,
   type: 'table'
+  table_fields: {}
+
   initialize: (element, options) ->
     options or (options = {})
     element.attrs or (element.attrs = {min_table_width: 100, min_table_height: 100})
@@ -58,6 +60,7 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     text_padding = 20
     start_y = text_height
     max_width = element.min_table_width
+    @table_fields = {}
 
     rect = new fabric.Rect({
       left: 0
@@ -101,6 +104,7 @@ fabric.Table = fabric.util.createClass(fabric.Group,
         top: start_y + 4
         fontSize: 18
       })
+      @table_fields[fname] = table_field_text
 
       max_width = Math.max(max_width, table_field_text.width + text_padding)
       group_elements.push(table_field_line)
@@ -122,15 +126,8 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     fabric.util.object.extend @callSuper('toObject')
 
   findFieldByName: (name) ->
-    i = @size()
-    while i--
-      item = @item(i)
-
-      if (item.isTableField())
-        if item.name and item.name == name
-          return item
-
-    undefined
+    console.log(name, @table_fields)
+    return @table_fields[name]
 )
 
 
@@ -150,6 +147,8 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
 
     @rel_start_type = if options.start_cap then options.start_cap else (cap_styles.non_mandatory | cap_styles.belongs_to)
     @rel_end_type = if options.end_cap then options.end_cap else (cap_styles.mandatory | cap_styles.has_many)
+    @bounds = {}
+    @originPoints = []
 
     @callSuper 'initialize', options
     @updateBounds(element)

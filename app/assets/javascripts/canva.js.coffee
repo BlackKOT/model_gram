@@ -69,20 +69,21 @@ window.canva = ->
 
   proceedRelationsList = (rels) ->
     for table_name, table_rels of rels
-      console.log(table_name, table_rels)
+      console.log('--', table_name)
       main_table = tables[table_name]
       unless main_table
         console.error(table_name + ' is not exists in tables hash')
       else
         for rel_table_name, rel_params of table_rels
+          console.log('----', rel_table_name, rel_params)
           rel_table = tables[rel_table_name]
 
           unless rel_table
-            console.error(rel_table_name + ' is not exists in tables hash')
+            console.error('is not exists in tables list')
             continue
 
           unless rel_params
-            console.error('Relation ' + rel_table_name + ' did not has relation params')
+            console.error('did not has relations params')
             continue
 
           back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&

@@ -248,7 +248,7 @@ window.canva = ->
 
 
   init = ->
-    canvas = new fabric.CanvasEx('c', { selection: false })
+    canvas = new fabric.CanvasEx('c', { selection: true })
 #    canvas.fireEventForObjectInsideGroup = true
 
 #    canvas.on('object:moving', (options) ->

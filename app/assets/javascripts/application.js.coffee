@@ -1,7 +1,7 @@
 #= require jquery
 #= require jquery_ujs
 #= require canva
-#= require packer
+#= require xdrectpacker
 # require_tree .
 
 window.canvas = window.canva()

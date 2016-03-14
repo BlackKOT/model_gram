@@ -334,7 +334,6 @@ window.canva = ->
       0
     )
 
-    console.log tablesPack
     packer.fit(tablesPack)
 
     for table in tablesPack

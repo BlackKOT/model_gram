@@ -67,7 +67,10 @@ window.canva = ->
     }
 
 
+
   proceedRelationsList = (rels) ->
+    canvas.renderOnAddRemove = false
+
     for table_name, table_rels of rels
       console.log('--', table_name)
       main_table = tables[table_name]
@@ -116,6 +119,9 @@ window.canva = ->
             main_table_field = main_table
 
           registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+
+    canvas.renderOnAddRemove = true
+    canvas.renderAll()
 
 
   isRelationBegan = ->
@@ -248,8 +254,8 @@ window.canva = ->
 
 
   init = ->
-    canvas = new fabric.CanvasEx('c', { selection: true })
-#    canvas.fireEventForObjectInsideGroup = true
+    canvas = new fabric.CanvasEx('c', { selection: false, stateful: false })
+    canvas.fireEventForObjectInsideGroup = false
 
 #    canvas.on('object:moving', (options) ->
 #      options.target.set({
@@ -260,7 +266,6 @@ window.canva = ->
 
     canvas.on('mouse:move', (options) ->
       if (isRelationBegan())
-
         to_pointer = canvas.getPointer(options.e)
 
         if (projection_line)

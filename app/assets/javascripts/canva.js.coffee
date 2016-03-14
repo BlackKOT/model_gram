@@ -1,5 +1,6 @@
 #= require fabric.linecap
 #= require fabric.canvasex
+#= require packer
 
 
 fabric.Canvas::getObjectsByName = (name) ->
@@ -47,6 +48,7 @@ fabric.Canvas::getFieldInTable = (table, options) ->
 
 window.canva = ->
   grid = 25
+  min_canvas_height = 600
   min_table_width = 80
   min_table_height = 120
   canvas = undefined
@@ -73,13 +75,13 @@ window.canva = ->
 
     for table_name, table_rels of rels
       console.log('--', table_name)
-      main_table = tables[table_name]
+      main_table = (tables[table_name] || {}).obj
       unless main_table
         console.error(table_name + ' is not exists in tables hash')
       else
         for rel_table_name, rel_params of table_rels
           console.log('----', rel_table_name, rel_params)
-          rel_table = tables[rel_table_name]
+          rel_table = (tables[rel_table_name] || {}).obj
 
           unless rel_table
             console.error('is not exists in tables list')
@@ -235,7 +237,7 @@ window.canva = ->
 
   resize = ->
     canvas.setWidth(window.innerWidth)
-    canvas.setHeight(window.innerHeight)
+    canvas.setHeight(Math.max(min_canvas_height, window.innerHeight))
     canvas.calcOffset()
 #    calc_grid()
 
@@ -317,7 +319,19 @@ window.canva = ->
 
 
   spacingTables = ->
-    #write me :)
+    canvas.setHeight(min_canvas_height)
+    packer = new Packer(canvas.width, canvas.height)
+    tablesPack = Object.keys(tables).map((key) -> tables[key])
+
+    console.log(canvas.width, canvas.height, tablesPack)
+    packer.fit(tablesPack)
+
+    for table in tablesPack
+      if table.fit
+        table.obj.left = table.fit.x
+        table.obj.top = table.fit.y
+
+    canvas.renderAll()
 
 
   addTable = (attrs) ->
@@ -334,7 +348,8 @@ window.canva = ->
     })
 
     canvas.add(table)
-    tables[attrs.table_name] = table
+    tables[attrs.table_name] = {obj: table, w: table.width, h: table.height}
+    min_canvas_height = Math.max(min_canvas_height, table.height + 100)
 
 
   removeTable = (name) ->

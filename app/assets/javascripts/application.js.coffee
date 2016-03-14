@@ -1,6 +1,7 @@
 #= require jquery
 #= require jquery_ujs
 #= require canva
+#= require packer
 # require_tree .
 
 window.canvas = window.canva()
@@ -14,6 +15,6 @@ $ ->
       attributes: table_attrs.attributes
     )
 
-  canvas.proceedRelationsList window.grid_data.rels
+#  canvas.proceedRelationsList window.grid_data.rels
 
   canvas.spacingTables()

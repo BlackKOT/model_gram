@@ -319,13 +319,10 @@ window.canva = ->
 
 
   spacingTables = ->
-    canvas.setHeight(min_canvas_height)
+    resize()
     packer = new NETXUS.RectanglePacker(canvas.width, canvas.height)
     tablesPack = Object.keys(tables).map((key) -> tables[key])
     tablesPack.sort((a, b) ->
-#      ax = a.w * a.h
-#      bx = b.w * b.h
-
       ax = a.h
       bx = b.h
 
@@ -336,10 +333,8 @@ window.canva = ->
 
     for table in tablesPack
       coords = packer.findCoords(table.w, table.h)
-      table.obj.left = coords.x
-      table.obj.top = coords.y
-
-    canvas.renderAll()
+      table.obj.set({left: coords.x, top: coords.y})
+      table.obj.setCoords()
 
 
   addTable = (attrs) ->

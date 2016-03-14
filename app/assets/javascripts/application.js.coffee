@@ -15,6 +15,4 @@ $ ->
     )
 
   canvas.spacingTables()
-
   canvas.proceedRelationsList window.grid_data.rels
-

@@ -86,7 +86,6 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     max_width = Math.max(max_width, table_name.width + text_padding)
 
     table_field_line = new fabric.Line([0, start_y, element.min_table_width, start_y], {
-      fill: 'rgba(0,0,0,0)'
       stroke: 'black'
       strokeWidth: 3
     })
@@ -95,7 +94,6 @@ fabric.Table = fabric.util.createClass(fabric.Group,
 
     for fname, params of element.attrs.attributes
       table_field_line = new fabric.Line([0, start_y, element.min_table_width, start_y], {
-        fill: 'rgba(0,0,0,0)'
         stroke: 'black'
         strokeWidth: 1
       })
@@ -121,6 +119,7 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     ##########################################################
 
     @callSuper 'initialize', group_elements, element
+    @hasRotatingPoint = false
     return
 
   toObject: ->

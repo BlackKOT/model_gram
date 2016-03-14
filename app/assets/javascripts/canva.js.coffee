@@ -1,6 +1,6 @@
 #= require fabric.linecap
 #= require fabric.canvasex
-#= require xdrectpacker
+#= require RectanglePacker
 
 
 fabric.Canvas::getObjectsByName = (name) ->

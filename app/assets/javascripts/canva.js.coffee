@@ -322,8 +322,19 @@ window.canva = ->
     canvas.setHeight(min_canvas_height)
     packer = new Packer(canvas.width, canvas.height)
     tablesPack = Object.keys(tables).map((key) -> tables[key])
+    tablesPack.sort((a, b) ->
+#      ax = a.w * a.h
+#      bx = b.w * b.h
 
-    console.log(canvas.width, canvas.height, tablesPack)
+      ax = a.h
+      bx = b.h
+
+      if (ax > bx) then return -1
+      if (ax < bx) then return 1
+      0
+    )
+
+    console.log tablesPack
     packer.fit(tablesPack)
 
     for table in tablesPack

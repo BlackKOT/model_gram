@@ -320,7 +320,7 @@ window.canva = ->
 
   spacingTables = ->
     canvas.setHeight(min_canvas_height)
-    packer = new Packer(canvas.width, canvas.height)
+    packer = new NETXUS.RectanglePacker(canvas.width, canvas.height)
     tablesPack = Object.keys(tables).map((key) -> tables[key])
     tablesPack.sort((a, b) ->
 #      ax = a.w * a.h
@@ -334,12 +334,10 @@ window.canva = ->
       0
     )
 
-    packer.fit(tablesPack)
-
     for table in tablesPack
-      if table.fit
-        table.obj.left = table.fit.x
-        table.obj.top = table.fit.y
+      coords = packer.findCoords(table.w, table.h)
+      table.obj.left = coords.x
+      table.obj.top = coords.y
 
     canvas.renderAll()
 

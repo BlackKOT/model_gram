@@ -203,8 +203,7 @@ window.canva = ->
 
 
 
-  redrawRelation = (event) -> # need to update checking of line existance
-    # at this moment lines existance checked only for table - not for table fields :(
+  redrawRelation = (event) ->
     canvas.on event, (options) ->
       object = options.target
       # udpate lines (if any)
@@ -290,7 +289,8 @@ window.canva = ->
       if (!curr_obj)
         cancelRelation()
       else unless(isRelationBegan())
-        canvas.bringToFront(curr_obj)
+        if curr_obj.isTable()
+          canvas.bringToFront(curr_obj)
     )
 
     canvas.on('mouse:dblclick', (options) ->

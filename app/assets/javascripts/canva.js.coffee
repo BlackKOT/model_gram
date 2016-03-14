@@ -224,7 +224,7 @@ window.canva = ->
               {obj: line_obj.to, rect: line_obj.from.boundingRect()}
             ]
 
-      canvas.renderAll()
+#      canvas.renderAll()
     return
 
 
@@ -261,6 +261,7 @@ window.canva = ->
 
     canvas.on('mouse:move', (options) ->
       if (isRelationBegan())
+
         to_pointer = canvas.getPointer(options.e)
 
         if (projection_line)

@@ -161,7 +161,7 @@ window.canva = ->
       start_cap: start_cap
       end_cap: end_cap
       strokeWidth: 3
-      selectable: true
+      selectable: false #TODO: revert me later
       lockMovementX: true
       lockMovementY: true
       lockRotation: true

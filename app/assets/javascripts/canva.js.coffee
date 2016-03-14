@@ -1,6 +1,7 @@
 #= require fabric.linecap
 #= require fabric.canvasex
 #= require RectanglePacker
+#= require snowflake
 
 
 fabric.Canvas::getObjectsByName = (name) ->
@@ -54,6 +55,7 @@ window.canva = ->
   canvas = undefined
   projection_line = undefined
   tables = {}
+  relations = {}
 
 
   pointertoRect = (pointer, width = 1, height = 1) ->
@@ -162,6 +164,14 @@ window.canva = ->
 
 
   registerRelation = (fromObject, toObject, start_cap = cap_styles.has_many, end_cap = cap_styles.belongs_to) ->
+    fObject = if fromObject.isTable() then fromObject else fromObject.group
+    tObject = if toObject.isTable() then toObject else toObject.group
+
+    (relations[fObject.name] || (relations[fObject.name] = {obj: fObject, w: fObject.width, h: fObject.height, links: []}))
+      .links.push(tObject.name)
+    (relations[tObject.name] || (relations[tObject.name] = {obj: tObject, w: tObject.width, h: tObject.height, links: []}))
+      .links.push(fObject.name)
+
     line = new (fabric.RelArrow)([
       {obj: fromObject, rect: toObject.boundingRect()}
       {obj: toObject, rect: fromObject.boundingRect()}
@@ -210,34 +220,33 @@ window.canva = ->
       return
 
 
+  redrawRelationForObject = (object) ->
+    if object.addChild
+      if object.addChild.from
+        object.addChild.from.forEach (line_obj) ->
+          line_obj.line.updateCoords [
+            {obj: line_obj.from, rect: line_obj.to.boundingRect()}
+            {obj: line_obj.to, rect: line_obj.from.boundingRect()}
+          ]
+
+      if object.addChild.to
+        object.addChild.to.forEach (line_obj) ->
+          line_obj.line.updateCoords [
+            {obj: line_obj.from, rect: line_obj.to.boundingRect()}
+            {obj: line_obj.to, rect: line_obj.from.boundingRect()}
+          ]
+
+  #      canvas.renderAll()
+
 
   redrawRelation = (event) ->
     canvas.on event, (options) ->
-      object = options.target
-      # udpate lines (if any)
-
-      if object.addChild
-        if object.addChild.from
-          object.addChild.from.forEach (line_obj) ->
-            line_obj.line.updateCoords [
-              {obj: line_obj.from, rect: line_obj.to.boundingRect()}
-              {obj: line_obj.to, rect: line_obj.from.boundingRect()}
-            ]
-
-        if object.addChild.to
-          object.addChild.to.forEach (line_obj) ->
-            line_obj.line.updateCoords [
-              {obj: line_obj.from, rect: line_obj.to.boundingRect()}
-              {obj: line_obj.to, rect: line_obj.from.boundingRect()}
-            ]
-
-#      canvas.renderAll()
-    return
+      redrawRelationForObject(options.target)
 
 
-  resize = ->
-    canvas.setWidth(window.innerWidth)
-    canvas.setHeight(Math.max(min_canvas_height, window.innerHeight))
+  resize = (w, h) ->
+    canvas.setWidth(w || window.innerWidth)
+    canvas.setHeight(h || Math.max(min_canvas_height, window.innerHeight))
     canvas.calcOffset()
 #    calc_grid()
 
@@ -319,22 +328,32 @@ window.canva = ->
 
 
   spacingTables = ->
-    resize()
-    packer = new NETXUS.RectanglePacker(canvas.width, canvas.height)
-    tablesPack = Object.keys(tables).map((key) -> tables[key])
-    tablesPack.sort((a, b) ->
-      ax = a.h
-      bx = b.h
+    res = snowflake().pack(relations)
 
-      if (ax > bx) then return -1
-      if (ax < bx) then return 1
-      0
-    )
+    resize(res.w, res.h)
+    for key in Object.keys(res.objs)
+      attrs = res.objs[key]
+      console.log(attrs.x, attrs.y)
+      attrs.obj.set({left: attrs.x, top: attrs.y})
+      attrs.obj.setCoords()
+      redrawRelationForObject(attrs.obj)
+    canvas.renderAll()
 
-    for table in tablesPack
-      coords = packer.findCoords(table.w, table.h)
-      table.obj.set({left: coords.x, top: coords.y})
-      table.obj.setCoords()
+#    packer = new NETXUS.RectanglePacker(canvas.width, canvas.height)
+#    tablesPack = Object.keys(tables).map((key) -> tables[key])
+#    tablesPack.sort((a, b) ->
+#      ax = a.h
+#      bx = b.h
+#
+#      if (ax > bx) then return -1
+#      if (ax < bx) then return 1
+#      0
+#    )
+#
+#    for table in tablesPack
+#      coords = packer.findCoords(table.w, table.h)
+#      table.obj.set({left: coords.x, top: coords.y})
+#      table.obj.setCoords()
 
 
   addTable = (attrs) ->

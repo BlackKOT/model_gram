@@ -9,7 +9,7 @@ window.snowflake = ->
 
 
   calc_circle_points = (radius, points_required, center_point) ->
-    block_intervals = [{min: 2.61666, max: 3.66333}, {min: 4.186666, max: 5.23333}]
+    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
 
     limit = if (isNaN(center_point.angle))
       points_required + Math.ceil(points_required / 1.3)

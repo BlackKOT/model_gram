@@ -1,7 +1,57 @@
+window.flake_rect = ->
+  x1 = 999999
+  y1 = 999999
+  x2 = -999999
+  y2 = -999999
+  objs = []
+  subrects = []
+
+  update_coords = (nx1, ny1, nx2, ny2) ->
+    x1 = Math.min(x1, nx1)
+    y1 = Math.min(y1, ny1)
+
+    x2 = Math.max(x2, nx2)
+    y2 = Math.max(y2, ny2)
+
+  add_obj = (point, obj) ->
+    objs.push(obj)
+    update_coords(point.x, point.y, point.x + obj.w, point.y + obj.h)
+
+  add_subrect = (subrect) ->
+    if (subrect.has_objects)
+      subrects.push(subrect)
+      update_coords(subrect.x1, subrect.y1, subrect.x2, subrect.y2)
+
+  w = ->
+    return x2 - x1
+
+  h = ->
+    return y2 - y1
+
+  has_objects = ->
+    return objs.length > 0
+
+  return {
+    add_obj: add_obj
+    has_objects: has_objects
+    add_subrect: add_subrect
+    w: w
+    h: h
+  }
+
+
 window.snowflake = ->
   def_link_segment_length = 40
   angleUnit = (limit) -> 6.28 / limit
 
+  update_rect = (rect, point, attrs) ->
+    rect.objs.push(attrs)
+
+    rect.x1 = Math.min(rect.x1, point.x)
+    rect.y1 = Math.min(rect.y1, point.y)
+
+    rect.x2 = Math.max(rect.x2, point.x + attrs.w)
+    rect.y2 = Math.max(rect.y2, point.y + attrs.h)
 
   calc_parent_blocked_quart = (parent_angle) ->
     min = (Math.round(parent_angle / 1.57) + 2) % 4 * 1.57
@@ -44,14 +94,13 @@ window.snowflake = ->
   update_rects = (rects) ->
     max_rect_width = 0
     max_rect_height = 0
-    if (rects.length > 0)
-      xcorrection = 0
-      ycorrection = 0
 
+    if (rects.length > 0)
       center_rect = rects.shift()
       center_rect_width = center_rect.w
       center_rect_height = center_rect.h
-      ycorrection = Math.min(ycorrection, center_rect.y1)
+      xcorrection = center_rect.x1
+      ycorrection = center_rect.y1
 
       offsetx = center_rect_width / 2
       offsety = center_rect_height / 2
@@ -59,11 +108,12 @@ window.snowflake = ->
       for rect in rects
         max_rect_width = Math.max(max_rect_width, rect.w)
         max_rect_height = Math.max(max_rect_height, rect.h)
+        xcorrection = Math.min(xcorrection, rect.x1)
         ycorrection = Math.min(ycorrection, rect.y1)
 
       link_width = Math.max(
-        offsetx + max_rect_width / 2 + def_link_segment_length,
-        offsety + max_rect_height / 2 + def_link_segment_length
+        offsetx + max_rect_width / 2
+        offsety + max_rect_height / 2
       )
 
       max_rect_width = offsetx + link_width + max_rect_width
@@ -74,7 +124,7 @@ window.snowflake = ->
 
       for obj in center_rect.objs
         obj.x += offsetx
-        obj.y += ycorrection
+        obj.y += ycorrection + offsety
         obj.ch = true
 
       limit = rects.length
@@ -89,50 +139,6 @@ window.snowflake = ->
           obj.y += offsetyy
 
     {w: max_rect_width, h: max_rect_height}
-
-#  update_rects = (rects) ->
-#    max_rect_width = 0
-#    max_rect_height = 0
-#    if (rects.length > 0)
-#      center_rect = rects.shift()
-#      center_rect_width = center_rect.w
-#      center_rect_height = center_rect.h
-#
-#      offsetx = center_rect_width / 2
-#      offsety = center_rect_height / 2
-#
-#      for rect in rects
-#        max_rect_width = Math.max(max_rect_width, rect.w)
-#        max_rect_height = Math.max(max_rect_height, rect.h)
-#
-#      link_width = Math.max(
-#        offsetx + max_rect_width / 2 + def_link_segment_length,
-#        offsety + max_rect_height / 2 + def_link_segment_length
-#      )
-#
-#      max_rect_width = offsetx + link_width + max_rect_width
-#      max_rect_height = offsety + link_width + max_rect_height
-#
-#
-#      # update center rect objs
-#
-#      for obj in center_rect.objs
-#        obj.x += offsetx
-#        obj.y += offsety
-#
-#
-#      # update other rects objs
-#      limit = rects.length
-#      for i in [0...limit]
-#        rect = rects[i]
-#        offsetx = Math.cos(angleUnit(limit) * i) * link_width
-#        offsety = Math.sin(angleUnit(limit) * i) * link_width
-#
-#        for obj in rect.objs
-#          obj.x += offsetx
-#          obj.y += offsety
-#
-#    {w: max_rect_width, h: max_rect_height}
 
 
   # params example
@@ -149,52 +155,52 @@ window.snowflake = ->
 
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
-        rect = bubling(
+        base_rect = flake_rect()
+        point = {x: 0, y: 0, angle: NaN}
+        base_rect.add_obj(point, obj)
+
+        subrect = bubling(
           objs,
           obj,
-          {x: -obj.w / 2, y: -obj.h / 2, angle: NaN},
-          {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []}
+          point,
         )
-        if (rect.objs.length > 0)
-          rect.w = rect.x2 - rect.x1
-          rect.h = rect.y2 - rect.y1
-          rects.push(rect)
+        base_rect.add_subrect(subrect)
+
+        if (rect.has_objects())
+          rects.push(base_rect)
 
 
     max_rect = update_rects(rects)
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 
-  bubling = (hashes, attrs, point, rect, parent_angle) ->
+  bubling = (hashes, attrs, point) ->
+    rect = flake_rect()
+
     unless attrs.x
-      rect.objs.push(attrs)
-
-      rect.x1 = Math.min(rect.x1, point.x)
-      rect.y1 = Math.min(rect.y1, point.y)
-
-      rect.x2 = Math.max(rect.x2, point.x + attrs.w)
-      rect.y2 = Math.max(rect.y2, point.y + attrs.h)
-
       attrs.x = point.x
       attrs.y = point.y
     else
       point.x = attrs.x
       point.y = attrs.y
 
-    radius = Math.max(attrs.w, attrs.h) + def_link_segment_length * (attrs.links.length + 1)
+    radius = Math.max(attrs.w / 2, attrs.h / 2) + Math.max(200, def_link_segment_length * (attrs.links.length + 1))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
       obj = hashes[attrs.links[i]]
       unless obj.x
         place_point = points.shift()
+        rect.add_obj(place_point, obj)
 
-        bubling(
+        subrect = bubling(
           hashes
           obj
           place_point
-          rect
+          flake_rect()
         )
+
+        rect.add_subrect(subrect)
 
     rect
 

@@ -18,7 +18,7 @@ window.flake_rect = ->
     update_coords(point.x, point.y, point.x + obj.w, point.y + obj.h)
 
   add_subrect = (subrect) ->
-    if (subrect.has_objects)
+    if (subrect.is_valid())
       subrects.push(subrect)
       update_coords(subrect.x1, subrect.y1, subrect.x2, subrect.y2)
 
@@ -41,10 +41,13 @@ window.flake_rect = ->
     add_subrect: add_subrect
     has_subrects: has_subrects
     subrects: subrects
+    is_valid: -> has_objects() && has_subrects()
     w: w
     h: h
     x1: x1
     y1: y1
+    x2: x2
+    y2: y2
   }
 
 
@@ -66,9 +69,6 @@ window.snowflake = ->
     else
       block_intervals.push(calc_parent_blocked_quart(center_point.angle))
       points_required + points_required / 8 + points_required % 8
-
-#    attrs.links.length + Math.ceil(attrs.links.length / 1.3)
-    #      attrs.links.length + attrs.links.length / 12 + attrs.links.length % 12
 
     points = []
     for i in [0...limit]
@@ -164,11 +164,11 @@ window.snowflake = ->
         subrect = bubling(
           objs,
           obj,
-          point,
+          point
         )
         base_rect.add_subrect(subrect)
 
-        if (base_rect.has_objects() || base_rect.has_subrects())
+        if (base_rect.is_valid())
           rects.push(base_rect)
 
 
@@ -199,7 +199,6 @@ window.snowflake = ->
           hashes
           obj
           place_point
-          flake_rect()
         )
 
         rect.add_subrect(subrect)

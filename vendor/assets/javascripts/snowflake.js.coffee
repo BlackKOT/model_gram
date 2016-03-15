@@ -1,10 +1,45 @@
 window.snowflake = ->
-  def_link_segment_length = 30
-  angleUnit = (limit)-> 6.28 / limit
+  def_link_segment_length = 40
+  angleUnit = (limit) -> 6.28 / limit
 
-  #  objs = {
-  #    uniq_obj.name: {obj: uniq_obj, w: 100, h: 100, links: [uniq_obj_names]}
-  #  }
+
+  calc_parent_blocked_quart = (parent_angle) ->
+    min = (Math.round(parent_angle / 1.57) + 2) % 4 * 1.57
+    return {min: min, max: min + 1.57}
+
+
+  calc_circle_points = (radius, points_required, center_point) ->
+    block_intervals = [{min: 2.61666, max: 3.66333}, {min: 4.186666, max: 5.23333}]
+
+    limit = if (isNaN(center_point.angle))
+      points_required + Math.ceil(points_required / 1.3)
+    else
+      block_intervals.push(calc_parent_blocked_quart(center_point.angle))
+      points_required + points_required / 8 + points_required % 8
+
+#    attrs.links.length + Math.ceil(attrs.links.length / 1.3)
+    #      attrs.links.length + attrs.links.length / 12 + attrs.links.length % 12
+
+    points = []
+    for i in [0...limit]
+      angle = angleUnit(limit) * i
+      valid = true
+      for interval in block_intervals
+        if angle >= interval.min && angle <= interval.max
+          valid = false
+          break
+
+      if (valid)
+        points.push(
+          {
+            x: Math.cos(angle) * radius + center_point.x
+            y: Math.sin(angle) * radius + center_point.y
+            angle: angle
+          }
+        )
+
+    return points
+
 
   update_rects = (rects) ->
     max_rect_width = 0
@@ -100,11 +135,13 @@ window.snowflake = ->
 #    {w: max_rect_width, h: max_rect_height}
 
 
-
+  # params example
+  #  objs = {
+  #    uniq_obj.name: {obj: uniq_obj, w: 100, h: 100, links: [uniq_obj_names]}
+  #  }
   pack = (objs) ->
     sortir = {}
     rects = []
-#    arr = prepare_hash(objs)
 
     for key, attrs of objs
       sortir[attrs.links.length] or (sortir[attrs.links.length] = [])
@@ -112,7 +149,12 @@ window.snowflake = ->
 
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
-        rect = bubling(objs, obj, {x: -obj.w / 2, y: -obj.h / 2}, {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []})
+        rect = bubling(
+          objs,
+          obj,
+          {x: -obj.w / 2, y: -obj.h / 2, angle: NaN},
+          {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []}
+        )
         if (rect.objs.length > 0)
           rect.w = rect.x2 - rect.x1
           rect.h = rect.y2 - rect.y1
@@ -123,7 +165,7 @@ window.snowflake = ->
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 
-  bubling = (hashes, attrs, point, rect) ->
+  bubling = (hashes, attrs, point, rect, parent_angle) ->
     unless attrs.x
       rect.objs.push(attrs)
 
@@ -139,23 +181,18 @@ window.snowflake = ->
       point.x = attrs.x
       point.y = attrs.y
 
-    limit = attrs.links.length # need to add + 1 node for ignoring direction of linking with parent
-    centerx = point.x
-    centery = point.y
-    radius = Math.max(attrs.w, attrs.h) + def_link_segment_length * limit
+    radius = Math.max(attrs.w, attrs.h) + def_link_segment_length * (attrs.links.length + 1)
+    points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
-      # if direction to parent link then continue # need t oprecalc points for exclusion of some
       obj = hashes[attrs.links[i]]
       unless obj.x
-#        sec_table_radius = def_link_segment_length * obj.links.length + Math.max(obj.w, obj.h) / 2
+        place_point = points.shift()
+
         bubling(
           hashes
-          hashes[attrs.links[i]]
-          {
-            x: Math.cos(angleUnit(limit) * i) * radius + centerx - obj.w / 2,
-            y: Math.sin(angleUnit(limit) * i) * radius + centery - obj.h / 2
-          }
+          obj
+          place_point
           rect
         )
 

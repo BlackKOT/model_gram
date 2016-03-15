@@ -1,5 +1,5 @@
 window.snowflake = ->
-  def_link_segment_length = 50
+  def_link_segment_length = 30
   angleUnit = (limit)-> 6.28 / limit
 
   #  objs = {
@@ -10,7 +10,9 @@ window.snowflake = ->
     max_rect_width = 0
     max_rect_height = 0
     if (rects.length > 0)
+      xcorrection = 0
       ycorrection = 0
+
       center_rect = rects.shift()
       center_rect_width = center_rect.w
       center_rect_height = center_rect.h
@@ -33,19 +35,23 @@ window.snowflake = ->
       max_rect_height = offsety + link_width + max_rect_height
 
       # update center rect objs
+      ycorrection = Math.abs(ycorrection)
 
       for obj in center_rect.objs
-        obj.y -= ycorrection
+        obj.x += offsetx
+        obj.y += ycorrection
+        obj.ch = true
 
       limit = rects.length
       for i in [0...limit]
         rect = rects[i]
-        offsetx = Math.cos(angleUnit(limit) * i) * link_width
-        offsety = Math.sin(angleUnit(limit) * i) * link_width
+        offsetxx = Math.cos(angleUnit(limit) * i) * link_width + offsetx
+        offsetyy = Math.sin(angleUnit(limit) * i) * link_width + offsety + ycorrection
 
         for obj in rect.objs
-          obj.x += offsetx
-          obj.y += offsety
+          if (obj.ch) then continue;
+          obj.x += offsetxx
+          obj.y += offsetyy
 
     {w: max_rect_width, h: max_rect_height}
 
@@ -106,7 +112,7 @@ window.snowflake = ->
 
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
-        rect = bubling(objs, obj, {x: 0, y: 0}, {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []})
+        rect = bubling(objs, obj, {x: -obj.w / 2, y: -obj.h / 2}, {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []})
         if (rect.objs.length > 0)
           rect.w = rect.x2 - rect.x1
           rect.h = rect.y2 - rect.y1
@@ -147,8 +153,8 @@ window.snowflake = ->
           hashes
           hashes[attrs.links[i]]
           {
-            x: Math.cos(angleUnit(limit) * i) * radius + centerx,
-            y: Math.sin(angleUnit(limit) * i) * radius + centery
+            x: Math.cos(angleUnit(limit) * i) * radius + centerx - obj.w / 2,
+            y: Math.sin(angleUnit(limit) * i) * radius + centery - obj.h / 2
           }
           rect
         )

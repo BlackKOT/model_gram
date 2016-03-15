@@ -72,23 +72,25 @@ window.canva = ->
 
   proceedRelationsList = (rels) ->
     canvas.renderOnAddRemove = false
+    $tables = $('.tables')
+    $rels = $('.rels')
 
     for table_name, table_rels of rels
       console.log('--', table_name)
       main_table = (tables[table_name] || {}).obj
       unless main_table
-        console.error(table_name + ' is not exists in tables hash')
+        $tables.append("<div class='error'>#{table_name} is not exists in tables hash</div>")
       else
         for rel_table_name, rel_params of table_rels
           console.log('----', rel_table_name, rel_params)
           rel_table = (tables[rel_table_name] || {}).obj
 
           unless rel_table
-            console.error('is not exists in tables list')
+            $tables.append("<div class='error'>#{rel_table_name} is not exists in tables hash</div>")
             continue
 
           unless rel_params
-            console.error('did not has relations params')
+            $tables.append("<div class='alert'>#{rel_table_name} did not has relations params</div>")
             continue
 
           back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&
@@ -98,13 +100,14 @@ window.canva = ->
           rel_table_field = main_table #if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
 
           if back_rel_type
-            console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].key)
+            rt_name = rel_table_field.name
+            console.warn('@ ', rt_name, rels[rel_table_name][table_name].key)
             rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].key || 'id')
 
             unless (rel_table_field)
-              console.error(
-                "@ #{(rels[rel_table_name][table_name].key || 'id')} is not finded in table #{rel_table_name}"
-              )
+              $rels.append("<div class='error'>@ #{(rels[rel_table_name][table_name].key || 'id')} is not finded in table #{rt_name}</div>")
+              console.error(rels[rel_table_name][table_name])
+#              $rels.append("<div class='info'>@ #{rels[rel_table_name][table_name]}</div>")
               rel_table_field = rel_table
 
             back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
@@ -113,11 +116,13 @@ window.canva = ->
           else
             back_rel_type = cap_styles.none
 
-          console.warn('! ', main_table_field.name, rel_params.key)
+          mt_name = main_table_field.name
+          console.warn('! ', mt_name, rel_params.key)
           main_table_field = main_table_field.findFieldByName(rel_params.key || 'id')
 
           unless (main_table_field)
-            console.error("! #{(rel_params.key || 'id')} is not finded in table #{table_name}")
+            $rels.append("<div class='error'>! #{(rel_params.key || 'id')} is not finded in table #{mt_name}</div>")
+            console.error(rel_params)
             main_table_field = main_table
 
           registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
@@ -333,8 +338,9 @@ window.canva = ->
 
     for table in tablesPack
       coords = packer.findCoords(table.w, table.h)
-      table.obj.set({left: coords.x, top: coords.y})
-      table.obj.setCoords()
+      if (coords)
+        table.obj.set({left: coords.x, top: coords.y})
+        table.obj.setCoords()
 
 
   addTable = (attrs) ->

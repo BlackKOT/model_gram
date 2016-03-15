@@ -13,3 +13,20 @@
  *= require_tree .
  *= require_self
  */
+
+.error {
+    color: red;
+}
+
+.alert {
+    color: gold;
+}
+
+.clear {
+    clear: both;
+}
+
+.container  .item {
+    float: left;
+    width: 50%;
+}

@@ -1,17 +1,17 @@
 window.flake_rect = ->
-  x1 = 999999
-  y1 = 999999
-  x2 = -999999
-  y2 = -999999
+  _x1 = 999999
+  _y1 = 999999
+  _x2 = -999999
+  _y2 = -999999
   objs = []
   subrects = []
 
   update_coords = (nx1, ny1, nx2, ny2) ->
-    x1 = Math.min(x1, nx1)
-    y1 = Math.min(y1, ny1)
+    _x1 = Math.min(_x1, nx1)
+    _y1 = Math.min(_y1, ny1)
 
-    x2 = Math.max(x2, nx2)
-    y2 = Math.max(y2, ny2)
+    _x2 = Math.max(_x2, nx2)
+    _y2 = Math.max(_y2, ny2)
 
   add_obj = (point, obj) ->
     objs.push(obj)
@@ -20,13 +20,13 @@ window.flake_rect = ->
   add_subrect = (subrect) ->
     if (subrect.is_valid())
       subrects.push(subrect)
-      update_coords(subrect.x1, subrect.y1, subrect.x2, subrect.y2)
+      update_coords(subrect.x1(), subrect.y1(), subrect.x2(), subrect.y2())
 
   w = ->
-    return x2 - x1
+    return _x2 - _x1
 
   h = ->
-    return y2 - y1
+    return _y2 - _y1
 
   has_objects = ->
     return objs.length > 0
@@ -44,10 +44,10 @@ window.flake_rect = ->
     is_valid: -> has_objects() && has_subrects()
     w: w
     h: h
-    x1: x1
-    y1: y1
-    x2: x2
-    y2: y2
+    x1: -> _x1
+    y1: -> _y1
+    x2: -> _x2
+    y2: -> _y2
   }
 
 
@@ -99,8 +99,8 @@ window.snowflake = ->
       center_rect = rects.shift()
       center_rect_width = center_rect.w()
       center_rect_height = center_rect.h()
-      xcorrection = center_rect.x1
-      ycorrection = center_rect.y1
+      xcorrection = center_rect.x1()
+      ycorrection = center_rect.y1()
 
       offsetx = center_rect_width / 2
       offsety = center_rect_height / 2
@@ -108,8 +108,8 @@ window.snowflake = ->
       for rect in rects
         max_rect_width = Math.max(max_rect_width, rect.w())
         max_rect_height = Math.max(max_rect_height, rect.h())
-        xcorrection = Math.min(xcorrection, rect.x1)
-        ycorrection = Math.min(ycorrection, rect.y1)
+        xcorrection = Math.min(xcorrection, rect.x1())
+        ycorrection = Math.min(ycorrection, rect.y1())
 
       link_width = Math.max(
         offsetx + max_rect_width / 2
@@ -158,30 +158,32 @@ window.snowflake = ->
         base_rect = flake_rect()
         point = {x: 0, y: 0, angle: NaN}
 
-        unless (obj.x)
-          base_rect.add_obj(point, obj)
+#        unless (obj.x)
+#          base_rect.add_obj(point, obj)
 
         subrect = bubling(
           objs,
           obj,
-          point
+          point,
+          base_rect
         )
-        base_rect.add_subrect(subrect)
+#        base_rect.add_subrect(subrect)
 
-        if (base_rect.is_valid())
+#        if (base_rect.has_subrects())
+        if (base_rect.has_objects())
           rects.push(base_rect)
-
 
     max_rect = update_rects(rects)
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 
-  bubling = (hashes, attrs, point) ->
-    rect = flake_rect()
+  bubling = (hashes, attrs, point, rect) ->
+#    rect = flake_rect()
 
     unless attrs.x
       attrs.x = point.x
       attrs.y = point.y
+      rect.add_obj(point, attrs)
     else
       point.x = attrs.x
       point.y = attrs.y
@@ -193,15 +195,16 @@ window.snowflake = ->
       obj = hashes[attrs.links[i]]
       unless obj.x
         place_point = points.shift()
-        rect.add_obj(place_point, obj)
+#        rect.add_obj(place_point, obj)
 
         subrect = bubling(
           hashes
           obj
-          place_point
+          place_point,
+          rect
         )
 
-        rect.add_subrect(subrect)
+#        rect.add_subrect(subrect)
 
     rect
 

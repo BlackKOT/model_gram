@@ -31,12 +31,20 @@ window.flake_rect = ->
   has_objects = ->
     return objs.length > 0
 
+  has_subrects = ->
+    return subrects.length > 0
+
   return {
     add_obj: add_obj
     has_objects: has_objects
+    objs: objs
     add_subrect: add_subrect
+    has_subrects: has_subrects
+    subrects: subrects
     w: w
     h: h
+    x1: x1
+    y1: y1
   }
 
 
@@ -44,14 +52,6 @@ window.snowflake = ->
   def_link_segment_length = 40
   angleUnit = (limit) -> 6.28 / limit
 
-  update_rect = (rect, point, attrs) ->
-    rect.objs.push(attrs)
-
-    rect.x1 = Math.min(rect.x1, point.x)
-    rect.y1 = Math.min(rect.y1, point.y)
-
-    rect.x2 = Math.max(rect.x2, point.x + attrs.w)
-    rect.y2 = Math.max(rect.y2, point.y + attrs.h)
 
   calc_parent_blocked_quart = (parent_angle) ->
     min = (Math.round(parent_angle / 1.57) + 2) % 4 * 1.57
@@ -97,8 +97,8 @@ window.snowflake = ->
 
     if (rects.length > 0)
       center_rect = rects.shift()
-      center_rect_width = center_rect.w
-      center_rect_height = center_rect.h
+      center_rect_width = center_rect.w()
+      center_rect_height = center_rect.h()
       xcorrection = center_rect.x1
       ycorrection = center_rect.y1
 
@@ -106,8 +106,8 @@ window.snowflake = ->
       offsety = center_rect_height / 2
 
       for rect in rects
-        max_rect_width = Math.max(max_rect_width, rect.w)
-        max_rect_height = Math.max(max_rect_height, rect.h)
+        max_rect_width = Math.max(max_rect_width, rect.w())
+        max_rect_height = Math.max(max_rect_height, rect.h())
         xcorrection = Math.min(xcorrection, rect.x1)
         ycorrection = Math.min(ycorrection, rect.y1)
 
@@ -157,7 +157,9 @@ window.snowflake = ->
       for obj in sortir[key]
         base_rect = flake_rect()
         point = {x: 0, y: 0, angle: NaN}
-        base_rect.add_obj(point, obj)
+
+        unless (obj.x)
+          base_rect.add_obj(point, obj)
 
         subrect = bubling(
           objs,
@@ -166,7 +168,7 @@ window.snowflake = ->
         )
         base_rect.add_subrect(subrect)
 
-        if (rect.has_objects())
+        if (base_rect.has_objects() || base_rect.has_subrects())
           rects.push(base_rect)
 
 

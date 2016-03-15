@@ -166,11 +166,8 @@ window.canva = ->
   registerRelation = (fromObject, toObject, start_cap = cap_styles.has_many, end_cap = cap_styles.belongs_to) ->
     fObject = if fromObject.isTable() then fromObject else fromObject.group
     tObject = if toObject.isTable() then toObject else toObject.group
-
-    (relations[fObject.name] || (relations[fObject.name] = {obj: fObject, w: fObject.width, h: fObject.height, links: []}))
-      .links.push(tObject.name)
-    (relations[tObject.name] || (relations[tObject.name] = {obj: tObject, w: tObject.width, h: tObject.height, links: []}))
-      .links.push(fObject.name)
+    relations[fObject.name].links.push(tObject.name)
+    relations[tObject.name].links.push(fObject.name)
 
     line = new (fabric.RelArrow)([
       {obj: fromObject, rect: toObject.boundingRect()}
@@ -329,31 +326,15 @@ window.canva = ->
 
   spacingTables = ->
     res = snowflake().pack(relations)
-
+    console.log(res)
     resize(res.w, res.h)
-    for key in Object.keys(res.objs)
-      attrs = res.objs[key]
-      console.log(attrs.x, attrs.y)
+    for key, attrs of res.objs
+      console.log(attrs.x, attrs.y, attrs.obj)
       attrs.obj.set({left: attrs.x, top: attrs.y})
       attrs.obj.setCoords()
       redrawRelationForObject(attrs.obj)
-    canvas.renderAll()
 
-#    packer = new NETXUS.RectanglePacker(canvas.width, canvas.height)
-#    tablesPack = Object.keys(tables).map((key) -> tables[key])
-#    tablesPack.sort((a, b) ->
-#      ax = a.h
-#      bx = b.h
-#
-#      if (ax > bx) then return -1
-#      if (ax < bx) then return 1
-#      0
-#    )
-#
-#    for table in tablesPack
-#      coords = packer.findCoords(table.w, table.h)
-#      table.obj.set({left: coords.x, top: coords.y})
-#      table.obj.setCoords()
+    canvas.renderAll()
 
 
   addTable = (attrs) ->
@@ -371,6 +352,7 @@ window.canva = ->
 
     canvas.add(table)
     tables[attrs.table_name] = {obj: table, w: table.width, h: table.height}
+    relations[table.name] = {obj: table, w: table.width, h: table.height, links: []}
     min_canvas_height = Math.max(min_canvas_height, table.height + 100)
 
 

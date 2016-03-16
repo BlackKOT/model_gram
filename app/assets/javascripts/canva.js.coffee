@@ -57,6 +57,12 @@ window.canva = ->
   table_aliases = {}
   relations = {}
 
+  save = ->
+    JSON.stringify(canvas)
+
+  load = (json) ->
+    canvas.loadFromJSON json, ->
+      alert ' this is a callback. invoked when canvas is loaded! '
 
   objIsArray = (obj) ->
     obj instanceof Array
@@ -405,4 +411,6 @@ window.canva = ->
     spacingTables: spacingTables
     proceedTablesList: proceedTablesList
     proceedRelationsList: proceedRelationsList
+    save: save
+    load: load
   }

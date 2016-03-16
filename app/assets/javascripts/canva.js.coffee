@@ -162,7 +162,7 @@ window.canva = ->
     return
 
 
-  registerRelation = (fromObject, toObject, start_cap = cap_styles.has_many, end_cap = cap_styles.belongs_to) ->
+  registerRelation = (fromObject, toObject, start_cap = cap_styles.belongs_to, end_cap = cap_styles.has_many) ->
     fObject = if fromObject.isTable() then fromObject else fromObject.group
     tObject = if toObject.isTable() then toObject else toObject.group
     relations[fObject.name].links.push(tObject.name)

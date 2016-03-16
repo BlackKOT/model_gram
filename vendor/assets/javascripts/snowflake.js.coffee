@@ -166,7 +166,7 @@ window.snowflake = ->
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 
-  bubling = (hashes, attrs, point, rect, parent_angle) ->
+  bubling = (hashes, attrs, point, rect) ->
     unless attrs.x
       rect.objs.push(attrs)
 
@@ -182,7 +182,7 @@ window.snowflake = ->
       point.x = attrs.x
       point.y = attrs.y
 
-    radius = Math.max(attrs.w / 2, attrs.h / 2) + Math.max(200, def_link_segment_length * (attrs.links.length + 1))
+    radius = Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.max(200, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

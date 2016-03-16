@@ -84,61 +84,69 @@ window.canva = ->
   proceedRelationsList = (rels) ->
     canvas.renderOnAddRemove = false
 
+    # prepare polymorph relations :(
+    for _, trels of rels
+      for rtable_name, trel of trels
+        unless tables[rtable_name]
+          if table_aliases[rtable_name]
+            proto = trel
+
+            for alias in table_aliases[rtable_name]
+              trels[alias] = proto
+
+            delete trels[rtable_name]
+    ######################################
+    console.log(rels)
+
+
     for table_name, table_rels of rels
       console.log('--', table_name)
       main_table = (tables[table_name] || {}).obj
       unless main_table
         console.error(table_name + ' is not exists in tables hash')
       else
-        for rtable_name, rel_params of table_rels
-          console.log('----', rtable_name, rel_params)
+        for rel_table_name, rel_params of table_rels
+          console.log('----', rel_table_name, rel_params)
+          rel_table = (tables[rel_table_name] || {}).obj
 
-          rel_table_names = [rtable_name]
-          unless tables[rtable_name]
-            if table_aliases[rtable_name]
-              rel_table_names = table_aliases[rtable_name]
-            else
-              console.error('is not exists in tables list')
-              continue
+          unless rel_table
+            console.error('is not exists in tables list')
+            continue
 
-          for rel_table_name in rel_table_names
-            rel_table = (tables[rel_table_name] || {}).obj
+          unless rel_params
+            console.error('did not has relations params')
+            continue
 
-            unless rel_params
-              console.error('did not has relations params')
-              continue
+          back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&
+            rels[rel_table_name][table_name].rel_type
 
+          main_table_field = rel_table #if (rel_params.rel_type == 'belongs_to') then rel_table else main_table
+          rel_table_field = main_table #if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
 
-            back_rel_type = rels[rel_table_name] && rels[rel_table_name][table_name] &&
-              rels[rel_table_name][table_name].rel_type
+          if back_rel_type
+            console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].key)
+            rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].key || 'id')
 
-            main_table_field = rel_table #if (rel_params.rel_type == 'belongs_to') then rel_table else main_table
-            rel_table_field = main_table #if (rels[rel_table_name][table_name].rel_type == 'belongs_to') then main_table else rel_table
+            unless (rel_table_field)
+              console.error(
+                "@ #{(rels[rel_table_name][table_name].key || 'id')} is not finded in table #{rel_table_name}"
+              )
+              rel_table_field = rel_table
 
-            if back_rel_type
-              console.warn('@ ', rel_table_field.name, rels[rel_table_name][table_name].key)
-              rel_table_field = rel_table_field.findFieldByName(rels[rel_table_name][table_name].key || 'id')
+            back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
+            # back relation is excluded from hash for preventing duplications of relations
+            delete rels[rel_table_name][table_name]
+          else
+            back_rel_type = cap_styles.none
 
-              unless (rel_table_field)
-                console.error(
-                  "@ #{(rels[rel_table_name][table_name].key || 'id')} is not finded in table #{rel_table_name}"
-                )
-                rel_table_field = rel_table
+          console.warn('! ', main_table_field.name, rel_params.key)
+          main_table_field = main_table_field.findFieldByName(rel_params.key || 'id')
 
-              back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
-              # back relation is excluded from hash for preventing duplications of relations
-              delete rels[rel_table_name][table_name]
-            else
-              back_rel_type = cap_styles.none
+          unless (main_table_field)
+            console.error("! #{(rel_params.key || 'id')} is not finded in table #{table_name}")
+            main_table_field = main_table
 
-            console.warn('! ', main_table_field.name, rel_params.key)
-            main_table_field = main_table_field.findFieldByName(rel_params.key || 'id')
-
-            unless (main_table_field)
-              console.error("! #{(rel_params.key || 'id')} is not finded in table #{table_name}")
-              main_table_field = main_table
-
-            registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+          registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
 
     canvas.renderOnAddRemove = true
     canvas.renderAll()

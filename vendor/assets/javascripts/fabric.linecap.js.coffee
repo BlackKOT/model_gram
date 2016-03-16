@@ -1,6 +1,6 @@
 #= require fabric.min
 
-window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16, transitional: 32, has_one: 64}
+window.cap_styles = {none: 1, belongs_to: 2, mandatory: 4, has_many: 8, non_mandatory: 16, transitional: 32, has_one: 64, poly: 128}
 window.cap_styles.through = cap_styles.transitional | cap_styles.has_many
 
 fabric.Object::isText = ->
@@ -166,10 +166,10 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       offset = 0
 
       if (rel_center.x <= obj_center.x)
-        res.x = rect.x - if object.isTable() then 0 else 12
+        res.x = rect.x - if object.isTable() then 0 else 10 + (@strokeWidth || 1) - 1
         offset = -@tail_width
       else
-        res.x = rect.x + rect.width - if object.isTable() then 2 else 12
+        res.x = rect.x + rect.width - if object.isTable() then 2 else 10 + (@strokeWidth || 1) - 1
         offset = @tail_width
 
       res.y = rect.y + rect.height / 2 - 4 # - 4 is text padding
@@ -311,15 +311,22 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     if !@visible
       return
 
+    @fill = 'black'
+    @stroke = 'black'
+
     ctx.save()
 
     if @rel_start_type & cap_styles.transitional || @rel_end_type & cap_styles.transitional
-      @fill = 'blue'
-      @stroke = 'blue'
+      ctx.fillStyle = 'blue'
+      ctx.strokeStyle = 'blue'
       ctx.setLineDash([5, 5])
+    else if @rel_start_type & cap_styles.poly || @rel_end_type & cap_styles.poly
+      ctx.fillStyle = 'green'
+      ctx.strokeStyle = 'green'
+      ctx.setLineDash([15, 5])
     else
-      @fill = 'red'
-      @stroke = 'red'
+      ctx.fillStyle = 'red'
+      ctx.strokeStyle = 'red'
 
     ctx.beginPath()
     ctx.moveTo @points[0].x, @points[0].y

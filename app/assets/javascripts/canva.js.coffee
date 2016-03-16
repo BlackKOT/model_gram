@@ -90,6 +90,7 @@ window.canva = ->
         unless tables[rtable_name]
           if table_aliases[rtable_name]
             proto = trel
+            proto.poly = true
 
             for alias in table_aliases[rtable_name]
               trels[alias] = proto
@@ -134,6 +135,8 @@ window.canva = ->
               rel_table_field = rel_table
 
             back_rel_type = cap_styles[rels[rel_table_name][table_name].rel_type]
+            if rels[rel_table_name][table_name].poly
+              back_rel_type |= cap_styles['poly']
             # back relation is excluded from hash for preventing duplications of relations
             delete rels[rel_table_name][table_name]
           else
@@ -146,7 +149,7 @@ window.canva = ->
             console.error("! #{(rel_params.key || 'id')} is not finded in table #{table_name}")
             main_table_field = main_table
 
-          registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type])
+          registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel_params.rel_type] | if rel_params.poly then cap_styles['poly'] else 0)
 
     canvas.renderOnAddRemove = true
     canvas.renderAll()
@@ -199,7 +202,7 @@ window.canva = ->
     ],
       start_cap: start_cap
       end_cap: end_cap
-      strokeWidth: 3
+      strokeWidth: 2
       selectable: false #TODO: revert me later
       lockMovementX: true
       lockMovementY: true

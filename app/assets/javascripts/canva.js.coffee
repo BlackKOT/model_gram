@@ -57,6 +57,12 @@ window.canva = ->
   tables = {}
   relations = {}
 
+  save = ->
+    JSON.stringify(canvas)
+
+  load = (json) ->
+    canvas.loadFromJSON json, ->
+      alert ' this is a callback. invoked when canvas is loaded! '
 
   pointertoRect = (pointer, width = 1, height = 1) ->
     {
@@ -383,4 +389,6 @@ window.canva = ->
     addTable: addTable
     spacingTables: spacingTables
     proceedRelationsList: proceedRelationsList
+    save: save
+    load: load
   }

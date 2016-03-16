@@ -16,3 +16,9 @@ $ ->
 
   canvas.proceedRelationsList window.grid_data.rels
   canvas.spacingTables()
+
+
+  $('#save_schema').on 'click', ->
+    json = canvas.save()
+    canvas.load(json)
+    

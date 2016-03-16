@@ -16,20 +16,20 @@ fabric.Object::isRelation = ->
   @get('type') == 'relArrow'
 
 fabric.Object::boundingRect = ->
-  table = @group
+  table = if @group then @group else this
   x_offset = if table then table.left else 0
   y_offset = if table then table.top else 0
   mod_width = if table && @isText() then table.width else @width
   mod_height = @height
 
   {
-    x: x_offset + @originalLeft
-    y: y_offset + @originalTop
+    x: x_offset + (@originalLeft || 0)
+    y: y_offset + (@originalTop || 0)
     width: mod_width #* @scaleX # are scale needs ?
     height: mod_height # * @scaleY  # are scale needs ?
     center: {
-      x: x_offset + @originalLeft + mod_width / 2
-      y: (y_offset + @originalTop + mod_height / 2)
+      x: x_offset + (@originalLeft || 0) + mod_width / 2
+      y: (y_offset + (@originalTop || 0) + mod_height / 2)
     }
   }
 
@@ -158,7 +158,7 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
   appendObjectPoints: (object, toRect, add_offset) ->
     res = if object.name then object.getCenterPoint() else object
 
-    if (object.isText && object.isText())
+    if (object.isText && (object.isText() || object.isTable()))
       rect = object.boundingRect()
 
       rel_center = toRect.center
@@ -166,10 +166,10 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       offset = 0
 
       if (rel_center.x <= obj_center.x)
-        res.x = rect.x - 12
+        res.x = rect.x - if object.isTable() then 0 else 12
         offset = -@tail_width
       else
-        res.x = rect.x + rect.width - 12
+        res.x = rect.x + rect.width - if object.isTable() then 2 else 12
         offset = @tail_width
 
       res.y = rect.y + rect.height / 2 - 4 # - 4 is text padding

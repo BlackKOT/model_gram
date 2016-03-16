@@ -1,6 +1,5 @@
 #= require fabric.linecap
 #= require fabric.canvasex
-#= require RectanglePacker
 #= require snowflake
 
 
@@ -169,7 +168,7 @@ window.canva = ->
     return
 
 
-  registerRelation = (fromObject, toObject, start_cap = cap_styles.has_many, end_cap = cap_styles.belongs_to) ->
+  registerRelation = (fromObject, toObject, start_cap = cap_styles.belongs_to, end_cap = cap_styles.has_many) ->
     fObject = if fromObject.isTable() then fromObject else fromObject.group
     tObject = if toObject.isTable() then toObject else toObject.group
     relations[fObject.name].links.push(tObject.name)
@@ -247,9 +246,9 @@ window.canva = ->
       redrawRelationForObject(options.target)
 
 
-  resize = (w, h) ->
-    canvas.setWidth(w || window.innerWidth)
-    canvas.setHeight(h || Math.max(min_canvas_height, window.innerHeight))
+  resize = (o, w, h) ->
+    canvas.setWidth(w ||= window.innerWidth)
+    canvas.setHeight(h ||= Math.max(min_canvas_height, window.innerHeight))
     canvas.calcOffset()
 #    calc_grid()
 
@@ -333,7 +332,7 @@ window.canva = ->
   spacingTables = ->
     res = snowflake().pack(relations)
     console.log(res)
-    resize(res.w, res.h)
+    resize(undefined, res.w, res.h)
     for key, attrs of res.objs
       console.log(attrs.x, attrs.y, attrs.obj)
       attrs.obj.set({left: attrs.x, top: attrs.y})

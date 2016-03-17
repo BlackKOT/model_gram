@@ -1,6 +1,16 @@
 window.snowflake = ->
-  def_link_segment_length = 40
+  def_link_segment_length = 30
   angleUnit = (limit) -> 6.28 / limit
+
+  rect_intersection = (rect1, rect2) ->
+    x = Math.max(rect1.x1, rect2.x1)
+    num1 = Math.min(rect1.x1 + rect_width(rect1), rect2.x1 + rect_width(rect2))
+    y = Math.max(rect1.y1, rect2.y1)
+    num2 = Math.min(rect1.y1 + rect_height(rect1), rect2.y1 + rect_height(rect2))
+    if num1 >= x && num2 >= y
+      {x1: x, y1: y, x2: num1, y2: num2, w: num1 - x, h: num2 - y}
+    else
+      undefined
 
   rect_generate = () ->
     {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
@@ -25,14 +35,44 @@ window.snowflake = ->
   rect_add_obj = (rect, obj, point) ->
     rect.objs.push(obj)
     rect_recalc_bounds(
+      rect,
       point.x, point.y
       point.x + obj.w, point.y + obj.h
     )
 
+  rect_proc_intersection = (rect, subrect) ->
+    intersect_rect = rect_intersection(rect, subrect)
+    console.log intersect_rect
+    if (intersect_rect)
+      console.log('^', intersect_rect.w, intersect_rect.h)
+      offset = Math.min(intersect_rect.w, intersect_rect.h) + 40
+
+      rect_move_objects(subrect, offset * (if intersect_rect.x1 < rect.x1 then -1 else 1), offset * (if intersect_rect.y1 < rect.y1 then -1 else 1))
+      console.log('!', rect_intersection(rect, subrect))
+
+
+
+  rect_move_objects = (rect, offsetx, offsety, mark) ->
+    rect.x1 = 99999
+    rect.y1 = 99999
+    rect.x2 = -99999
+    rect.y2 = -99999
+    for obj in rect.objs
+      obj.x += offsetx
+      obj.y += offsety
+      obj.ch = !!mark
+      rect_recalc_bounds(rect, obj.x, obj.y, obj.x + obj.w, obj.y + obj.h)
+
+    for subrect in rect.subrects
+      rect_move_objects(subrect, offsetx, offsety, mark)
+
+
 
   rect_add_subrect = (rect, subrect) ->
     rect.subrects.push(subrect)
+#    rect.objs = rect.objs.concat(subrect.objs)
     rect_recalc_bounds(
+      rect,
       subrect.x1, subrect.y1
       subrect.x2, subrect.y2
     )
@@ -44,14 +84,14 @@ window.snowflake = ->
 
 
   calc_circle_points = (radius, points_required, center_point) ->
-    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
+#    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
+    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
 
     limit = if (isNaN(center_point.angle))
       points_required + Math.ceil(points_required / 1.3)
     else
       block_intervals.push(calc_parent_blocked_quart(center_point.angle))
       points_required + points_required * (6.28 / 5)
-
 
     points = []
     for i in [0...limit]
@@ -70,6 +110,12 @@ window.snowflake = ->
             angle: angle
           }
         )
+
+
+#    if (points.length > points_required)
+#      step = points.length / (points.length - points_required)
+#      for ind in [0...points.length] by step
+#        points.splice(ind, 1)
 
     if (points.length < points_required)
       console.error('Points is not enough :(')
@@ -167,21 +213,15 @@ window.snowflake = ->
 
   bubling = (hashes, attrs, point, rect) ->
     unless attrs.x
-      rect.objs.push(attrs)
-
-      rect.x1 = Math.min(rect.x1, point.x)
-      rect.y1 = Math.min(rect.y1, point.y)
-
-      rect.x2 = Math.max(rect.x2, point.x + attrs.w)
-      rect.y2 = Math.max(rect.y2, point.y + attrs.h)
+      rect_add_obj(rect, attrs, point)
 
       attrs.x = point.x
       attrs.y = point.y
     else
-      point.x = attrs.x
-      point.y = attrs.y
+      return rect
 
-    radius = Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.max(200, def_link_segment_length * attrs.links.length))
+
+    radius = Math.min(Math.max(attrs.w / 2, attrs.h / 2), Math.max(400, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
@@ -189,12 +229,15 @@ window.snowflake = ->
       unless obj.x
         place_point = points.shift()
 
-        bubling(
+        subrect = bubling(
           hashes
           obj
           place_point
-          rect
+          rect_generate()
         )
+
+        rect_proc_intersection(rect, subrect)
+        rect_add_subrect(rect, subrect)
 
     rect
 

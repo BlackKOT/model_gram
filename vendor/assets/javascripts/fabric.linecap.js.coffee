@@ -126,7 +126,6 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     fabric.util.object.extend @callSuper('toObject')
 
   findFieldByName: (name) ->
-    console.log(name, @table_fields)
     return @table_fields[name]
 )
 

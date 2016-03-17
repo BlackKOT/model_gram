@@ -17,8 +17,6 @@ window.snowflake = ->
       block_intervals.push(calc_parent_blocked_quart(center_point.angle))
       points_required + points_required / 8 + points_required % 8
 
-#    attrs.links.length + Math.ceil(attrs.links.length / 1.3)
-    #      attrs.links.length + attrs.links.length / 12 + attrs.links.length % 12
 
     points = []
     for i in [0...limit]
@@ -38,6 +36,7 @@ window.snowflake = ->
           }
         )
 
+    console.log('QQQQQ', points_required, points.length)
     return points
 
 
@@ -90,51 +89,6 @@ window.snowflake = ->
           obj.y += offsetyy
 
     {w: max_rect_width, h: max_rect_height}
-
-#  update_rects = (rects) ->
-#    max_rect_width = 0
-#    max_rect_height = 0
-#    if (rects.length > 0)
-#      center_rect = rects.shift()
-#      center_rect_width = center_rect.w
-#      center_rect_height = center_rect.h
-#
-#      offsetx = center_rect_width / 2
-#      offsety = center_rect_height / 2
-#
-#      for rect in rects
-#        max_rect_width = Math.max(max_rect_width, rect.w)
-#        max_rect_height = Math.max(max_rect_height, rect.h)
-#
-#      link_width = Math.max(
-#        offsetx + max_rect_width / 2 + def_link_segment_length,
-#        offsety + max_rect_height / 2 + def_link_segment_length
-#      )
-#
-#      max_rect_width = offsetx + link_width + max_rect_width
-#      max_rect_height = offsety + link_width + max_rect_height
-#
-#
-#      # update center rect objs
-#
-#      for obj in center_rect.objs
-#        obj.x += offsetx
-#        obj.y += offsety
-#
-#
-#      # update other rects objs
-#      limit = rects.length
-#      for i in [0...limit]
-#        rect = rects[i]
-#        offsetx = Math.cos(angleUnit(limit) * i) * link_width
-#        offsety = Math.sin(angleUnit(limit) * i) * link_width
-#
-#        for obj in rect.objs
-#          obj.x += offsetx
-#          obj.y += offsety
-#
-#    {w: max_rect_width, h: max_rect_height}
-
 
   # params example
   #  objs = {

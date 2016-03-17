@@ -15,7 +15,7 @@ window.snowflake = ->
       points_required + Math.ceil(points_required / 1.3)
     else
       block_intervals.push(calc_parent_blocked_quart(center_point.angle))
-      points_required + points_required / 8 + points_required % 8
+      points_required + points_required * (6.28 / 5)
 
 
     points = []
@@ -36,7 +36,8 @@ window.snowflake = ->
           }
         )
 
-    console.log('QQQQQ', points_required, points.length)
+    if (points.length < points_required)
+      console.error('Points is not enough :(')
     return points
 
 

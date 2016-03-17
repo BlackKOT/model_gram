@@ -324,9 +324,6 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
       ctx.fillStyle = 'green'
       ctx.strokeStyle = 'green'
       ctx.setLineDash([15, 5])
-    else
-      ctx.fillStyle = 'red'
-      ctx.strokeStyle = 'red'
 
     ctx.beginPath()
     ctx.moveTo @points[0].x, @points[0].y

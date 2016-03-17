@@ -2,6 +2,41 @@ window.snowflake = ->
   def_link_segment_length = 40
   angleUnit = (limit) -> 6.28 / limit
 
+  rect_generate = () ->
+    {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
+
+  rect_width = (rect) ->
+    Math.abs(rect.x2 - rect.x1)
+
+  rect_height = (rect) ->
+    Math.abs(rect.y2 - rect.y1)
+
+  rect_init_max = (rect) ->
+    rect.w = rect_width(rect)
+    rect.h = rect_height(rect)
+
+  rect_recalc_bounds = (rect, xn1, yn1, xn2, yn2) ->
+    rect.x1 = Math.min(rect.x1, xn1)
+    rect.y1 = Math.min(rect.y1, yn1)
+
+    rect.x2 = Math.max(rect.x2, xn2)
+    rect.y2 = Math.max(rect.y2, yn2)
+
+  rect_add_obj = (rect, obj, point) ->
+    rect.objs.push(obj)
+    rect_recalc_bounds(
+      point.x, point.y
+      point.x + obj.w, point.y + obj.h
+    )
+
+
+  rect_add_subrect = (rect, subrect) ->
+    rect.subrects.push(subrect)
+    rect_recalc_bounds(
+      subrect.x1, subrect.y1
+      subrect.x2, subrect.y2
+    )
+
 
   calc_parent_blocked_quart = (parent_angle) ->
     min = (Math.round(parent_angle / 1.57) + 2) % 4 * 1.57
@@ -44,52 +79,62 @@ window.snowflake = ->
   update_rects = (rects) ->
     max_rect_width = 0
     max_rect_height = 0
+
+    xmin = 999999
+    ymin = 999999
+
+    xmax = -999999
+    ymax = -999999
+
     if (rects.length > 0)
-      xcorrection = 0
-      ycorrection = 0
-
-      center_rect = rects.shift()
-      center_rect_width = center_rect.w
-      center_rect_height = center_rect.h
-      ycorrection = Math.min(ycorrection, center_rect.y1)
-
-      offsetx = center_rect_width / 2
-      offsety = center_rect_height / 2
-
       for rect in rects
-        max_rect_width = Math.max(max_rect_width, rect.w)
-        max_rect_height = Math.max(max_rect_height, rect.h)
-        xcorrection = Math.min(xcorrection, rect.x1)
-        ycorrection = Math.min(ycorrection, rect.y1)
+        xmin = Math.min(xmin, rect.x1)
+        ymin = Math.min(ymin, rect.y1)
+        xmax = Math.max(xmax, rect.x2)
+        ymax = Math.max(ymax, rect.y2)
 
-      link_width = Math.max(
-        offsetx + max_rect_width / 2
-        offsety + max_rect_height / 2
-      )
+#      center_rect = rects.shift()
+#      center_rect_width = center_rect.w
+#      center_rect_height = center_rect.h
+#      ycorrection = Math.min(ycorrection, center_rect.y1)
+#
+#      offsetx = center_rect_width / 2
+#      offsety = center_rect_height / 2
+#
+#      for rect in rects
+#        max_rect_width = Math.max(max_rect_width, rect.w)
+#        max_rect_height = Math.max(max_rect_height, rect.h)
+#        xcorrection = Math.min(xcorrection, rect.x1)
+#        ycorrection = Math.min(ycorrection, rect.y1)
+#
+#      link_width = Math.max(
+#        offsetx + max_rect_width / 2
+#        offsety + max_rect_height / 2
+#      )
+#
+#      max_rect_width = offsetx + link_width + max_rect_width
+#      max_rect_height = offsety + link_width + max_rect_height
+#
+#      # update center rect objs
+#      ycorrection = Math.abs(ycorrection)
+#
+#      for obj in center_rect.objs
+#        obj.x += offsetx
+#        obj.y += ycorrection + offsety
+#        obj.ch = true
+#
+#      limit = rects.length
+#      for i in [0...limit]
+#        rect = rects[i]
+#        offsetxx = Math.cos(angleUnit(limit) * i) * link_width + offsetx
+#        offsetyy = Math.sin(angleUnit(limit) * i) * link_width + offsety + ycorrection
+#
+#        for obj in rect.objs
+#          if (obj.ch) then continue;
+#          obj.x += offsetxx
+#          obj.y += offsetyy
 
-      max_rect_width = offsetx + link_width + max_rect_width
-      max_rect_height = offsety + link_width + max_rect_height
-
-      # update center rect objs
-      ycorrection = Math.abs(ycorrection)
-
-      for obj in center_rect.objs
-        obj.x += offsetx
-        obj.y += ycorrection + offsety
-        obj.ch = true
-
-      limit = rects.length
-      for i in [0...limit]
-        rect = rects[i]
-        offsetxx = Math.cos(angleUnit(limit) * i) * link_width + offsetx
-        offsetyy = Math.sin(angleUnit(limit) * i) * link_width + offsety + ycorrection
-
-        for obj in rect.objs
-          if (obj.ch) then continue;
-          obj.x += offsetxx
-          obj.y += offsetyy
-
-    {w: max_rect_width, h: max_rect_height}
+    {w: xmax - xmin, h: ymax - ymin}
 
   # params example
   #  objs = {
@@ -108,12 +153,11 @@ window.snowflake = ->
         rect = bubling(
           objs,
           obj,
-          {x: -obj.w / 2, y: -obj.h / 2, angle: NaN},
-          {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: []}
+          {x: 0, y: 0, angle: NaN},
+          rect_generate()
         )
         if (rect.objs.length > 0)
-          rect.w = rect.x2 - rect.x1
-          rect.h = rect.y2 - rect.y1
+          rect_init_max(rect)
           rects.push(rect)
 
 

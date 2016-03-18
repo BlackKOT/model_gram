@@ -70,7 +70,7 @@ window.snowflake = ->
 
   rect_add_subrect = (rect, subrect) ->
     rect.subrects.push(subrect)
-#    rect.objs = rect.objs.concat(subrect.objs)
+    rect.objs = rect.objs.concat(subrect.objs)
     rect_recalc_bounds(
       rect,
       subrect.x1, subrect.y1
@@ -85,13 +85,15 @@ window.snowflake = ->
 
   calc_circle_points = (radius, points_required, center_point) ->
 #    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
-    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
+#    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
+    block_intervals = []
+    limit = points_required
 
-    limit = if (isNaN(center_point.angle))
-      points_required + Math.ceil(points_required / 1.3)
-    else
-      block_intervals.push(calc_parent_blocked_quart(center_point.angle))
-      points_required + points_required * (6.28 / 5)
+#    limit = if (isNaN(center_point.angle))
+#      points_required + Math.ceil(points_required / 1.3)
+#    else
+#      block_intervals.push(calc_parent_blocked_quart(center_point.angle))
+#      points_required + points_required * (6.28 / 5)
 
     points = []
     for i in [0...limit]
@@ -123,8 +125,8 @@ window.snowflake = ->
 
 
   update_rects = (rects) ->
-    max_rect_width = 0
-    max_rect_height = 0
+#    max_rect_width = 0
+#    max_rect_height = 0
 
     xmin = 999999
     ymin = 999999
@@ -138,6 +140,19 @@ window.snowflake = ->
         ymin = Math.min(ymin, rect.y1)
         xmax = Math.max(xmax, rect.x2)
         ymax = Math.max(ymax, rect.y2)
+
+      offsetx = if xmin < 0 then -xmin else 0
+      offsety = if ymin < 0 then -ymin else 0
+
+      for rect in rects
+        for obj in rect.objs
+          if obj.ch then continue
+
+          obj.x += offsetx
+          obj.y += offsety
+          obj.ch = true
+
+
 
 #      center_rect = rects.shift()
 #      center_rect_width = center_rect.w
@@ -180,7 +195,7 @@ window.snowflake = ->
 #          obj.x += offsetxx
 #          obj.y += offsetyy
 
-    {w: xmax - xmin, h: ymax - ymin}
+    {w: Math.min(6000, xmax - xmin), h: Math.min(6000, ymax - ymin)}
 
   # params example
   #  objs = {
@@ -194,6 +209,7 @@ window.snowflake = ->
       sortir[attrs.links.length] or (sortir[attrs.links.length] = [])
       sortir[attrs.links.length].push(attrs) # need to sort by height
 
+    i = 0
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
         rect = bubling(
@@ -201,6 +217,7 @@ window.snowflake = ->
           obj,
           {x: 0, y: 0, angle: NaN},
           rect_generate()
+          '' + ++i
         )
         if (rect.objs.length > 0)
           rect_init_max(rect)
@@ -211,9 +228,10 @@ window.snowflake = ->
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 
-  bubling = (hashes, attrs, point, rect) ->
+  bubling = (hashes, attrs, point, rect, series) ->
     unless attrs.x
-      rect_add_obj(rect, attrs, point)
+      unless attrs.point
+        rect_add_obj(rect, attrs, point)
 
       attrs.x = point.x
       attrs.y = point.y
@@ -221,19 +239,25 @@ window.snowflake = ->
       return rect
 
 
-    radius = Math.min(Math.max(attrs.w / 2, attrs.h / 2), Math.max(400, def_link_segment_length * attrs.links.length))
+    radius = Math.max(Math.max(attrs.w, attrs.h), Math.min(400, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
       obj = hashes[attrs.links[i]]
-      unless obj.x
-        place_point = points.shift()
+      unless obj.series
+        obj.series = series
+        obj.point = points.shift()
+        rect_add_obj(rect, obj, obj.point)
 
+    for i in [0...attrs.links.length]
+      obj = hashes[attrs.links[i]]
+      if obj.series == series
         subrect = bubling(
           hashes
           obj
-          place_point
+          obj.point
           rect_generate()
+          series + i
         )
 
         rect_proc_intersection(rect, subrect)

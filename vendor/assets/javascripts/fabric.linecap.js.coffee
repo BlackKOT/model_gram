@@ -41,17 +41,19 @@ fabric.TableField = fabric.util.createClass(fabric.Text,
     return
 
   toObject: ->
-    fabric.util.object.extend @callSuper('toObject')
+    fabric.util.object.extend @.callSuper('toObject'), { name: this.name }
 )
 
 
 fabric.Table = fabric.util.createClass(fabric.Group,
   type: 'table'
   table_fields: {}
+  attrs: undefined
 
   initialize: (element, options) ->
     options or (options = {})
     element.attrs or (element.attrs = {min_table_width: 100, min_table_height: 100})
+    @attrs = element.attrs
     element.name = element.attrs.table_name
     ##########################################################
 
@@ -123,7 +125,7 @@ fabric.Table = fabric.util.createClass(fabric.Group,
     return
 
   toObject: ->
-    fabric.util.object.extend @callSuper('toObject')
+    fabric.util.object.extend @callSuper('toObject'), {name: @name, attrs: @attrs, table_fields: @table_fields}
 
   findFieldByName: (name) ->
     console.log(name, @table_fields)
@@ -154,6 +156,16 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     @updateBounds(element)
     return
 
+  toObject: ->
+    fabric.util.object.extend @callSuper('toObject'), {
+      bounds: @bounds,
+      points: @points,
+      originPoints: @originPoints,
+      rel_start_type: @rel_start_type,
+      rel_end_type: @rel_end_type,
+      tail_width: @tail_width,
+      tail_height: @tail_height
+    }
 
   appendObjectPoints: (object, toRect, add_offset) ->
     res = if object.name then object.getCenterPoint() else object
@@ -339,12 +351,30 @@ fabric.RelArrow = fabric.util.createClass(fabric.Object,
     return
 )
 
+fabric.TableField.fromObject = (object, callback) ->
+  callback and callback(new (fabric.TableField)([
+    object.name
+  ], object))
+  return
+
+fabric.Table.fromObject = (object, callback) ->
+  callback and callback(new (fabric.Table)([
+    object.name
+    object.attrs
+    object.table_fields
+  ], object))
+  return
+
+
 fabric.RelArrow.fromObject = (object, callback) ->
   callback and callback(new (fabric.RelArrow)([
-    object.x1
-    object.y1
-    object.x2
-    object.y2
+    object.bounds
+    object.points
+    object.originPoints
+    object.rel_start_type
+    object.rel_end_type
+    object.tail_width
+    object.tail_height
   ], object))
   return
 

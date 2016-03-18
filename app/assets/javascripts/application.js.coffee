@@ -3,6 +3,7 @@
 #= require canva
 # require_tree .
 
+window.json = undefined
 window.canvas = window.canva()
 
 $ ->
@@ -12,8 +13,9 @@ $ ->
   canvas.proceedRelationsList window.grid_data.rels
   canvas.spacingTables()
 
-
   $('#save_schema').on 'click', ->
-    json = canvas.save()
-    canvas.load(json)
-    
+    window.json = canvas.save()
+
+  $('#load_schema').on 'click', ->
+    canvas.load(window.json)
+    console.log window.json

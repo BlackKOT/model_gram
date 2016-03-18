@@ -18,40 +18,40 @@ window.snowflake = ->
 
 
   rect_proc_intersection = (rect, subrect) ->
-#    for sub in rect.subrects
-#      i = 0
-#      while(i++ < 10)
-#        intersect_rect = rect_intersection(sub, subrect)
-#        if (intersect_rect)
-#          console.log('^', rect, subrect, intersect_rect)
-#
-#          if intersect_rect.w < intersect_rect.h
-#            w = intersect_rect.w + 1
-#            h = 0
-#          else
-#            w = 0
-#            h = intersect_rect.h + 1
-#
-#          rect_move_objects(subrect, w, h)
-#          console.log('!', rect_intersection(rect, subrect))
-#        else
-#          break
-
-
     for sub in rect.subrects
-      intersect_rect = rect_intersection(sub, subrect)
-      if (intersect_rect)
-        console.log('^', rect, subrect, intersect_rect)
+      i = 0
+      while(i++ < 10)
+        intersect_rect = rect_intersection(sub, subrect)
+        if (intersect_rect)
+          console.log('^', rect, subrect, intersect_rect)
 
-        if intersect_rect.w < intersect_rect.h
-          w = intersect_rect.w + 1
-          h = 0
+          if intersect_rect.w < intersect_rect.h
+            w = intersect_rect.w + 1
+            h = 0
+          else
+            w = 0
+            h = intersect_rect.h + 1
+
+          rect_move_objects(subrect, w, h)
+          console.log('!', rect_intersection(rect, subrect))
         else
-          w = 0
-          h = intersect_rect.h + 1
+          break
 
-        rect_move_objects(subrect, w, h)
-        console.log('!', rect_intersection(rect, subrect))
+
+#    for sub in rect.subrects
+#      intersect_rect = rect_intersection(sub, subrect)
+#      if (intersect_rect)
+##        console.log('^', rect, subrect, intersect_rect)
+#
+#        if intersect_rect.w < intersect_rect.h
+#          w = intersect_rect.w + 1
+#          h = 0
+#        else
+#          w = 0
+#          h = intersect_rect.h + 1
+#
+#        rect_move_objects(subrect, w, h)
+##        console.log('!', rect_intersection(rect, subrect))
 
 
 
@@ -108,7 +108,7 @@ window.snowflake = ->
 
   rect_add_subrect = (rect, subrect) ->
     rect.subrects.push(subrect)
-    rect.objs = rect.objs.concat(subrect.objs)
+#    rect.objs = rect.objs.concat(subrect.objs)
     rect_recalc_bounds(
       rect,
       subrect.x1, subrect.y1
@@ -161,9 +161,6 @@ window.snowflake = ->
 
 
   update_rects = (canvas, rects) ->
-#    max_rect_width = 0
-#    max_rect_height = 0
-
     for ind in [0...rects.length]
       base_rect = rects[ind]
       for ind2 in [ind + 1...rects.length]

@@ -8,9 +8,52 @@ window.snowflake = ->
     y = Math.max(rect1.y1, rect2.y1)
     num2 = Math.min(rect1.y1 + rect_height(rect1), rect2.y1 + rect_height(rect2))
     if num1 >= x && num2 >= y
-      {x1: x, y1: y, x2: num1, y2: num2, w: num1 - x, h: num2 - y}
+      {
+        x1: x, y1: y, x2: num1, y2: num2,
+        w: if (rect1.x1 > rect2.x1) then rect2.x1 - rect1.x2 else rect2.x2 - rect1.x1
+        h: if (rect1.y1 > rect2.y1) then rect2.y1 - rect1.y2 else rect2.y2 - rect1.y1
+      }
     else
       undefined
+
+
+  rect_proc_intersection = (rect, subrect) ->
+#    for sub in rect.subrects
+#      i = 0
+#      while(i++ < 10)
+#        intersect_rect = rect_intersection(sub, subrect)
+#        if (intersect_rect)
+#          console.log('^', rect, subrect, intersect_rect)
+#
+#          if intersect_rect.w < intersect_rect.h
+#            w = intersect_rect.w + 1
+#            h = 0
+#          else
+#            w = 0
+#            h = intersect_rect.h + 1
+#
+#          rect_move_objects(subrect, w, h)
+#          console.log('!', rect_intersection(rect, subrect))
+#        else
+#          break
+
+
+    for sub in rect.subrects
+      intersect_rect = rect_intersection(sub, subrect)
+      if (intersect_rect)
+        console.log('^', rect, subrect, intersect_rect)
+
+        if intersect_rect.w < intersect_rect.h
+          w = intersect_rect.w + 1
+          h = 0
+        else
+          w = 0
+          h = intersect_rect.h + 1
+
+        rect_move_objects(subrect, w, h)
+        console.log('!', rect_intersection(rect, subrect))
+
+
 
   rect_generate = (obj, point) ->
     rect = {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
@@ -43,25 +86,19 @@ window.snowflake = ->
       point.x + obj.w, point.y + obj.h
     )
 
-  rect_proc_intersection = (rect, subrect) ->
-    intersect_rect = rect_intersection(rect, subrect)
-    if (intersect_rect)
-      console.log('^', rect, subrect, intersect_rect)
-      offset = Math.min(intersect_rect.w, intersect_rect.h) + 1 # 10 * (if intersect_rect.x1 < rect.x1 then 1 else -1)
-      rect_move_objects(subrect, offset, 0)
-      console.log('!', rect_intersection(rect, subrect))
-
-
 
   rect_move_objects = (rect, offsetx, offsety, mark) ->
     rect.x1 = 99999
     rect.y1 = 99999
     rect.x2 = -99999
     rect.y2 = -99999
+
     for obj in rect.objs
-      obj.x += offsetx
-      obj.y += offsety
-      obj.ch = !!mark
+      unless obj.ch
+        obj.x += offsetx
+        obj.y += offsety
+        obj.ch = !!mark
+
       rect_recalc_bounds(rect, obj.x, obj.y, obj.x + obj.w, obj.y + obj.h)
 
     for subrect in rect.subrects
@@ -113,19 +150,24 @@ window.snowflake = ->
         )
 
 
-#    if (points.length > points_required)
-#      step = points.length / (points.length - points_required)
-#      for ind in [0...points.length] by step
-#        points.splice(ind, 1)
+    if (points.length > points_required)
+      step = points.length / (points.length - points_required)
+      for ind in [0...points.length] by step
+        points.splice(ind, 1)
 
     if (points.length < points_required)
       console.error('Points is not enough :(')
     return points
 
 
-  update_rects = (rects) ->
+  update_rects = (canvas, rects) ->
 #    max_rect_width = 0
 #    max_rect_height = 0
+
+    for ind in [0...rects.length]
+      base_rect = rects[ind]
+      for ind2 in [ind + 1...rects.length]
+        rect_proc_intersection(base_rect, rects[ind2])
 
     xmin = 999999
     ymin = 999999
@@ -145,11 +187,17 @@ window.snowflake = ->
 
       for rect in rects
         for obj in rect.objs
-          if obj.ch then continue
+          rect_move_objects(rect, offsetx, offsety, true)
 
-          obj.x += offsetx
-          obj.y += offsety
-          obj.ch = true
+        canvas.add new fabric.Rect({
+          left: rect.x1
+          top: rect.y1
+          width: rect.w
+          height: rect.h
+          fill: 'rgba(0,0,0,0)'
+          stroke: 'red'
+          strokeWidth: 1
+        })
 
 
 
@@ -200,7 +248,7 @@ window.snowflake = ->
   #  objs = {
   #    uniq_obj.name: {obj: uniq_obj, w: 100, h: 100, links: [uniq_obj_names]}
   #  }
-  pack = (objs) ->
+  pack = (canvas, objs) ->
     sortir = {}
     rects = []
 
@@ -226,7 +274,7 @@ window.snowflake = ->
           rects.push(rect)
 
 
-    max_rect = update_rects(rects)
+    max_rect = update_rects(canvas, rects)
     return { w: max_rect.w, h: max_rect.h, objs: objs }
 
 

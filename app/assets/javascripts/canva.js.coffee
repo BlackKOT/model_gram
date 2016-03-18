@@ -351,7 +351,7 @@ window.canva = ->
 
 
   spacingTables = ->
-    res = snowflake().pack(relations)
+    res = snowflake().pack(canvas, relations)
     console.log(res)
     resize(undefined, res.w, res.h)
     for key, attrs of res.objs

@@ -12,8 +12,11 @@ window.snowflake = ->
     else
       undefined
 
-  rect_generate = () ->
-    {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
+  rect_generate = (obj, point) ->
+    rect = {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
+    if obj && !!!obj.x
+      rect_add_obj(rect, obj, point)
+    rect
 
   rect_width = (rect) ->
     Math.abs(rect.x2 - rect.x1)
@@ -145,6 +148,8 @@ window.snowflake = ->
       offsety = if ymin < 0 then -ymin else 0
 
       for rect in rects
+        console.log('&', rect)
+
         for obj in rect.objs
           if obj.ch then continue
 
@@ -212,11 +217,12 @@ window.snowflake = ->
     i = 0
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
+        point = {x: 0, y: 0, angle: NaN}
         rect = bubling(
           objs,
           obj,
-          {x: 0, y: 0, angle: NaN},
-          rect_generate()
+          point,
+          rect_generate(obj, point)
           '' + ++i
         )
         if (rect.objs.length > 0)
@@ -230,16 +236,13 @@ window.snowflake = ->
 
   bubling = (hashes, attrs, point, rect, series) ->
     unless attrs.x
-      unless attrs.point
-        rect_add_obj(rect, attrs, point)
-
       attrs.x = point.x
       attrs.y = point.y
     else
       return rect
 
 
-    radius = Math.max(Math.max(attrs.w, attrs.h), Math.min(400, def_link_segment_length * attrs.links.length))
+    radius = Math.max(Math.max(attrs.w, attrs.h), Math.min(300, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
@@ -256,12 +259,13 @@ window.snowflake = ->
           hashes
           obj
           obj.point
-          rect_generate()
+          rect_generate(obj, obj.point)
           series + i
         )
 
-        rect_proc_intersection(rect, subrect)
-        rect_add_subrect(rect, subrect)
+        if (subrect.objs.length > 0)
+          rect_proc_intersection(rect, subrect)
+          rect_add_subrect(rect, subrect)
 
     rect
 

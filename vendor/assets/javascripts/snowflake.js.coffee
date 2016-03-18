@@ -45,12 +45,10 @@ window.snowflake = ->
 
   rect_proc_intersection = (rect, subrect) ->
     intersect_rect = rect_intersection(rect, subrect)
-    console.log intersect_rect
     if (intersect_rect)
-      console.log('^', intersect_rect.w, intersect_rect.h)
-      offset = Math.min(intersect_rect.w, intersect_rect.h) + 40
-
-      rect_move_objects(subrect, offset * (if intersect_rect.x1 < rect.x1 then -1 else 1), offset * (if intersect_rect.y1 < rect.y1 then -1 else 1))
+      console.log('^', rect, subrect, intersect_rect)
+      offset = Math.min(intersect_rect.w, intersect_rect.h) + 1 # 10 * (if intersect_rect.x1 < rect.x1 then 1 else -1)
+      rect_move_objects(subrect, offset, 0)
       console.log('!', rect_intersection(rect, subrect))
 
 
@@ -88,15 +86,13 @@ window.snowflake = ->
 
   calc_circle_points = (radius, points_required, center_point) ->
 #    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
-#    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
-    block_intervals = []
-    limit = points_required
+    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
 
-#    limit = if (isNaN(center_point.angle))
-#      points_required + Math.ceil(points_required / 1.3)
-#    else
-#      block_intervals.push(calc_parent_blocked_quart(center_point.angle))
-#      points_required + points_required * (6.28 / 5)
+    limit = if (isNaN(center_point.angle))
+      points_required + Math.ceil(points_required / 1.3)
+    else
+      block_intervals.push(calc_parent_blocked_quart(center_point.angle))
+      points_required + points_required * (6.28 / 5)
 
     points = []
     for i in [0...limit]
@@ -148,8 +144,6 @@ window.snowflake = ->
       offsety = if ymin < 0 then -ymin else 0
 
       for rect in rects
-        console.log('&', rect)
-
         for obj in rect.objs
           if obj.ch then continue
 
@@ -218,12 +212,14 @@ window.snowflake = ->
     for key in Object.keys(sortir).reverse()
       for obj in sortir[key]
         point = {x: 0, y: 0, angle: NaN}
+        obj.series = '' + i++
+
         rect = bubling(
           objs,
           obj,
           point,
           rect_generate(obj, point)
-          '' + ++i
+          '' + i
         )
         if (rect.objs.length > 0)
           rect_init_max(rect)
@@ -242,7 +238,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = Math.max(Math.max(attrs.w, attrs.h), Math.min(300, def_link_segment_length * attrs.links.length))
+    radius = Math.max(Math.max(attrs.w / 2, attrs.h), Math.min(200, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

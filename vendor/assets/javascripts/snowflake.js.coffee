@@ -13,9 +13,6 @@ window.snowflake = ->
       strokeWidth: 1
     })
 
-    for subrect in rect.subrects
-      rect_draw(canvas, subrect)
-
     return true
 
 

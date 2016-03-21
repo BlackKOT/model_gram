@@ -30,6 +30,10 @@ window.snowflake = ->
     else
       undefined
 
+  rect_proc_subrect_intersection = (rect, subrect) ->
+    for sub in rect.subrects
+      rect_proc_intersection(sub, subrect)
+
 
   rect_proc_intersection = (rect, subrect) ->
     i = 0
@@ -335,7 +339,7 @@ window.snowflake = ->
 
 
     for sub in subrects
-      rect_proc_intersection(rect, sub)
+      rect_proc_subrect_intersection(rect, sub)
       rect_add_subrect(rect, sub)
 
     rect

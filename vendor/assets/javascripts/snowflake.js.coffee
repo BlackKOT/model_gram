@@ -2,6 +2,23 @@ window.snowflake = ->
   def_link_segment_length = 30
   angleUnit = (limit) -> 6.28 / limit
 
+  rect_draw = (canvas, rect) ->
+    canvas.add new fabric.Rect({
+      left: rect.x1
+      top: rect.y1
+      width: rect.w
+      height: rect.h
+      fill: 'rgba(0,0,0,0)'
+      stroke: 'red'
+      strokeWidth: 1
+    })
+
+    for subrect in rect.subrects
+      rect_draw(canvas, subrect)
+
+    return true
+
+
   rect_intersection = (rect1, rect2) ->
     x = Math.max(rect1.x1, rect2.x1)
     num1 = Math.min(rect1.x1 + rect_width(rect1), rect2.x1 + rect_width(rect2))
@@ -18,40 +35,40 @@ window.snowflake = ->
 
 
   rect_proc_intersection = (rect, subrect) ->
-    for sub in rect.subrects
-      i = 0
-      while(i++ < 10)
-        intersect_rect = rect_intersection(sub, subrect)
-        if (intersect_rect)
-          console.log('^', rect, subrect, intersect_rect)
-
-          if intersect_rect.w < intersect_rect.h
-            w = intersect_rect.w + 1
-            h = 0
-          else
-            w = 0
-            h = intersect_rect.h + 1
-
-          rect_move_objects(subrect, w, h)
-          console.log('!', rect_intersection(rect, subrect))
-        else
-          break
-
-
 #    for sub in rect.subrects
-#      intersect_rect = rect_intersection(sub, subrect)
-#      if (intersect_rect)
-##        console.log('^', rect, subrect, intersect_rect)
+#      i = 0
+#      while(i++ < 10)
+#        intersect_rect = rect_intersection(sub, subrect)
+#        if (intersect_rect)
+#          console.log('^', rect, subrect, intersect_rect)
 #
-#        if intersect_rect.w < intersect_rect.h
-#          w = intersect_rect.w + 1
-#          h = 0
+#          if intersect_rect.w < intersect_rect.h
+#            w = intersect_rect.w + 1
+#            h = 0
+#          else
+#            w = 0
+#            h = intersect_rect.h + 1
+#
+#          rect_move_objects(subrect, w, h)
+#          console.log('!', rect_intersection(rect, subrect))
 #        else
-#          w = 0
-#          h = intersect_rect.h + 1
-#
-#        rect_move_objects(subrect, w, h)
-##        console.log('!', rect_intersection(rect, subrect))
+#          break
+
+
+    for sub in rect.subrects
+      intersect_rect = rect_intersection(sub, subrect)
+      if (intersect_rect)
+#        console.log('^', rect, subrect, intersect_rect)
+
+        if intersect_rect.w < intersect_rect.h
+          w = intersect_rect.w + 1
+          h = 0
+        else
+          w = 0
+          h = intersect_rect.h + 1
+
+        rect_move_objects(subrect, w, h)
+#        console.log('!', rect_intersection(rect, subrect))
 
 
 
@@ -78,6 +95,7 @@ window.snowflake = ->
     rect.x2 = Math.max(rect.x2, xn2)
     rect.y2 = Math.max(rect.y2, yn2)
 
+
   rect_add_obj = (rect, obj, point) ->
     rect.objs.push(obj)
     rect_recalc_bounds(
@@ -103,6 +121,7 @@ window.snowflake = ->
 
     for subrect in rect.subrects
       rect_move_objects(subrect, offsetx, offsety, mark)
+      rect_recalc_bounds(rect, subrect.x1, subrect.y1, subrect.x2, subrect.y2)
 
 
 
@@ -186,16 +205,7 @@ window.snowflake = ->
         for obj in rect.objs
           rect_move_objects(rect, offsetx, offsety, true)
 
-        canvas.add new fabric.Rect({
-          left: rect.x1
-          top: rect.y1
-          width: rect.w
-          height: rect.h
-          fill: 'rgba(0,0,0,0)'
-          stroke: 'red'
-          strokeWidth: 1
-        })
-
+        rect_draw(canvas, rect)
 
 
 #      center_rect = rects.shift()

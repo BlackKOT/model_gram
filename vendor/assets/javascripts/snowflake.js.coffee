@@ -246,7 +246,7 @@ window.snowflake = ->
 #          obj.x += offsetxx
 #          obj.y += offsetyy
 
-    {w: Math.max(6000, xmax - xmin), h: Math.max(6000, ymax - ymin)}
+    {w: Math.min(6000, xmax - xmin), h: Math.min(6000, ymax - ymin)}
 
   # params example
   #  objs = {
@@ -290,7 +290,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = Math.max(Math.max(attrs.w / 2, attrs.h), Math.min(200, def_link_segment_length * attrs.links.length))
+    radius = 50 #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
@@ -300,6 +300,7 @@ window.snowflake = ->
         obj.point = points.shift()
         rect_add_obj(rect, obj, obj.point)
 
+    subrects = []
     for i in [0...attrs.links.length]
       obj = hashes[attrs.links[i]]
       if obj.series == series
@@ -312,8 +313,12 @@ window.snowflake = ->
         )
 
         if (subrect.objs.length > 0)
-          rect_proc_intersection(rect, subrect)
-          rect_add_subrect(rect, subrect)
+          subrects.push(subrect)
+
+
+    for sub in subrects
+      rect_proc_intersection(rect, sub)
+      rect_add_subrect(rect, sub)
 
     rect
 

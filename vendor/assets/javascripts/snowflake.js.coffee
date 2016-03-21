@@ -32,22 +32,40 @@ window.snowflake = ->
 
 
   rect_proc_intersection = (rect, subrect) ->
-    for sub in rect.subrects
-#      i = 0
-#      while(i++ < 10)
-      intersect_rect = rect_intersection(sub, subrect)
+    i = 0
+    while(i++ < 10)
+      intersect_rect = rect_intersection(rect, subrect)
       if (intersect_rect)
         console.log('^', rect, subrect, intersect_rect)
 
         if intersect_rect.w < intersect_rect.h
-          w = intersect_rect.w + 1
+          w = intersect_rect.w
           h = 0
         else
           w = 0
-          h = intersect_rect.h + 1
+          h = intersect_rect.h
 
         rect_move_objects(subrect, w, h)
         console.log('!', rect_intersection(rect, subrect))
+      else
+        break
+
+#    for sub in rect.subrects
+#      i = 0
+#      while(i++ < 10)
+#        intersect_rect = rect_intersection(sub, subrect)
+#        if (intersect_rect)
+#          console.log('^', rect, subrect, intersect_rect)
+#
+#          if intersect_rect.w < intersect_rect.h
+#            w = intersect_rect.w
+#            h = 0
+#          else
+#            w = 0
+#            h = intersect_rect.h
+#
+#          rect_move_objects(subrect, w, h)
+#          console.log('!', rect_intersection(rect, subrect))
 #        else
 #          break
 

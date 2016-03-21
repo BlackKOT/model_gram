@@ -24,8 +24,8 @@ window.snowflake = ->
     if num1 >= x && num2 >= y
       {
         x1: x, y1: y, x2: num1, y2: num2,
-        w: if (rect2.x1 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + 10 else rect1.x1 - rect2.x2 - 10
-        h: if (rect2.y1 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + 10 else rect1.y1 - rect2.y2 - 10
+        w: if (rect2.x1 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + 30 else rect1.x1 - rect2.x2 - 30
+        h: if (rect2.y1 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + 30 else rect1.y1 - rect2.y2 - 30
       }
     else
       undefined
@@ -33,6 +33,8 @@ window.snowflake = ->
   rect_proc_subrect_intersection = (rect, subrect) ->
     for sub in rect.subrects
       rect_proc_intersection(sub, subrect)
+
+    subrect.moved = true
 
 
   rect_proc_intersection = (rect, subrect) ->
@@ -54,45 +56,9 @@ window.snowflake = ->
       else
         break
 
-#    for sub in rect.subrects
-#      i = 0
-#      while(i++ < 10)
-#        intersect_rect = rect_intersection(sub, subrect)
-#        if (intersect_rect)
-#          console.log('^', rect, subrect, intersect_rect)
-#
-#          if intersect_rect.w < intersect_rect.h
-#            w = intersect_rect.w
-#            h = 0
-#          else
-#            w = 0
-#            h = intersect_rect.h
-#
-#          rect_move_objects(subrect, w, h)
-#          console.log('!', rect_intersection(rect, subrect))
-#        else
-#          break
-
-
-#    for sub in rect.subrects
-#      intersect_rect = rect_intersection(sub, subrect)
-#      if (intersect_rect)
-##        console.log('^', rect, subrect, intersect_rect)
-#
-#        if intersect_rect.w < intersect_rect.h
-#          w = intersect_rect.w + 1
-#          h = 0
-#        else
-#          w = 0
-#          h = intersect_rect.h + 1
-#
-#        rect_move_objects(subrect, w, h)
-##        console.log('!', rect_intersection(rect, subrect))
-
-
 
   rect_generate = (obj, point) ->
-    rect = {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: []}
+    rect = {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: [], name: obj.obj.name}
     if obj && !!!obj.x
       rect_add_obj(rect, obj, point)
     rect
@@ -312,7 +278,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = 50 #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
+    radius = attrs.w / 2 #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]
@@ -338,10 +304,13 @@ window.snowflake = ->
           subrects.push(subrect)
 
 
+    console.log('Main', rect.name)
     for sub in subrects
+      console.log('Rel', sub.name)
       rect_proc_subrect_intersection(rect, sub)
       rect_add_subrect(rect, sub)
 
+    console.log('--------------------')
     rect
 
 

@@ -32,40 +32,40 @@ window.snowflake = ->
 
 
   rect_proc_intersection = (rect, subrect) ->
-#    for sub in rect.subrects
-#      i = 0
-#      while(i++ < 10)
-#        intersect_rect = rect_intersection(sub, subrect)
-#        if (intersect_rect)
-#          console.log('^', rect, subrect, intersect_rect)
-#
-#          if intersect_rect.w < intersect_rect.h
-#            w = intersect_rect.w + 1
-#            h = 0
-#          else
-#            w = 0
-#            h = intersect_rect.h + 1
-#
-#          rect_move_objects(subrect, w, h)
-#          console.log('!', rect_intersection(rect, subrect))
-#        else
-#          break
-
-
     for sub in rect.subrects
-      intersect_rect = rect_intersection(sub, subrect)
-      if (intersect_rect)
-#        console.log('^', rect, subrect, intersect_rect)
+      i = 0
+      while(i++ < 10)
+        intersect_rect = rect_intersection(sub, subrect)
+        if (intersect_rect)
+          console.log('^', rect, subrect, intersect_rect)
 
-        if intersect_rect.w < intersect_rect.h
-          w = intersect_rect.w + 1
-          h = 0
+          if intersect_rect.w < intersect_rect.h
+            w = intersect_rect.w + 1
+            h = 0
+          else
+            w = 0
+            h = intersect_rect.h + 1
+
+          rect_move_objects(subrect, w, h)
+          console.log('!', rect_intersection(rect, subrect))
         else
-          w = 0
-          h = intersect_rect.h + 1
+          break
 
-        rect_move_objects(subrect, w, h)
-#        console.log('!', rect_intersection(rect, subrect))
+
+#    for sub in rect.subrects
+#      intersect_rect = rect_intersection(sub, subrect)
+#      if (intersect_rect)
+##        console.log('^', rect, subrect, intersect_rect)
+#
+#        if intersect_rect.w < intersect_rect.h
+#          w = intersect_rect.w + 1
+#          h = 0
+#        else
+#          w = 0
+#          h = intersect_rect.h + 1
+#
+#        rect_move_objects(subrect, w, h)
+##        console.log('!', rect_intersection(rect, subrect))
 
 
 
@@ -246,7 +246,7 @@ window.snowflake = ->
 #          obj.x += offsetxx
 #          obj.y += offsetyy
 
-    {w: Math.min(6000, xmax - xmin), h: Math.min(6000, ymax - ymin)}
+    {w: Math.max(6000, xmax - xmin), h: Math.max(6000, ymax - ymin)}
 
   # params example
   #  objs = {

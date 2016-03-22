@@ -54,7 +54,9 @@ window.snowflake = ->
           w = 0
           h = intersect_rect.h
 
+        console.log('**** start move')
         rect_move_objects(subrect, w, h)
+        console.log('**** end move')
         console.log('!', rect_intersection(rect, subrect))
       else
         break
@@ -104,6 +106,7 @@ window.snowflake = ->
 
     for obj in rect.objs
       unless obj.ch
+        console.log('*', obj.obj.name)
         obj.x += offsetx
         obj.y += offsety
         obj.ch = !!mark
@@ -111,6 +114,7 @@ window.snowflake = ->
       rect_recalc_bounds(rect, obj.x, obj.y, obj.x + obj.w, obj.y + obj.h)
 
     for subrect in rect.subrects
+      console.log('**', subrect.name)
       rect_move_objects(subrect, offsetx, offsety, mark)
       rect_recalc_bounds(rect, subrect.x1, subrect.y1, subrect.x2, subrect.y2)
 
@@ -292,7 +296,7 @@ window.snowflake = ->
       unless obj.series
         obj.series = series
         obj.point = points.shift()
-        rect_add_obj(rect, obj, obj.point)
+#        rect_add_obj(rect, obj, obj.point)
 
     subrects = []
     for i in [0...attrs.links.length]

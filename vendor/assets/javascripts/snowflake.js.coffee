@@ -1,5 +1,5 @@
 window.snowflake = ->
-  def_link_segment_length = 30
+  def_link_segment_length = 40
   angleUnit = (limit) -> 6.28 / limit
 
   rect_draw = (canvas, rect) ->
@@ -27,18 +27,17 @@ window.snowflake = ->
     if num1 >= x && num2 >= y
       {
         x1: x, y1: y, x2: num1, y2: num2,
-        w: if (rect2.x1 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + 30 else rect1.x1 - rect2.x2 - 30
-        h: if (rect2.y1 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + 30 else rect1.y1 - rect2.y2 - 30
+        w: if (rect2.x1 + rect_width(rect2) / 2 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + def_link_segment_length else rect1.x1 - rect2.x2 - def_link_segment_length
+        h: if (rect2.y1 + rect_height(rect2) / 2 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + def_link_segment_length else rect1.y1 - rect2.y2 - def_link_segment_length
       }
     else
       undefined
 
   rect_proc_subrect_intersection = (rect, subrect) ->
-    if rect.subrects.length == 0
-      rect_proc_intersection(rect, subrect)
-    else
-      for sub in rect.subrects
-        rect_proc_intersection(sub, subrect)
+    rect_proc_intersection(rect.base, subrect)
+
+    for sub in rect.subrects
+      rect_proc_intersection(sub, subrect)
 
 
   rect_proc_intersection = (rect, subrect) ->
@@ -62,7 +61,10 @@ window.snowflake = ->
 
 
   rect_generate = (obj, point) ->
-    rect = {x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: [], name: obj.obj.name}
+    rect = {
+      x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: [], name: obj.obj.name
+      base: {x1: point.x, y1: point.y, x2: point.x + obj.w, y2: point.y + obj.h}
+    }
     if obj && !!!obj.x
       rect_add_obj(rect, obj, point)
     rect
@@ -282,7 +284,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = attrs.w / 2 # attrs.w + def_link_segment_length #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
+    radius = attrs.w / 2 + def_link_segment_length # attrs.w + def_link_segment_length #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

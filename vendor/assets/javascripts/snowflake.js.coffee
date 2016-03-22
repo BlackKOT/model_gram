@@ -13,6 +13,9 @@ window.snowflake = ->
       strokeWidth: 1
     })
 
+    for sub in rect.subrects
+      rect_draw(canvas, sub)
+
     return true
 
 
@@ -33,8 +36,6 @@ window.snowflake = ->
   rect_proc_subrect_intersection = (rect, subrect) ->
     for sub in rect.subrects
       rect_proc_intersection(sub, subrect)
-
-    subrect.moved = true
 
 
   rect_proc_intersection = (rect, subrect) ->
@@ -278,7 +279,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = attrs.w / 2 #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
+    radius = attrs.w / 2 # attrs.w + def_link_segment_length #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

@@ -47,7 +47,7 @@ window.snowflake = ->
       if (intersect_rect)
         console.log('^', rect, subrect, intersect_rect)
 
-        if intersect_rect.w < intersect_rect.h
+        if Math.abs(intersect_rect.w) < Math.abs(intersect_rect.h)
           w = intersect_rect.w
           h = 0
         else
@@ -284,7 +284,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = def_link_segment_length # attrs.w + def_link_segment_length #Math.max(Math.max(attrs.w / 2, attrs.h / 2), Math.min(100, def_link_segment_length * attrs.links.length))
+    radius = def_link_segment_length # attrs.w + def_link_segment_length
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

@@ -34,8 +34,11 @@ window.snowflake = ->
       undefined
 
   rect_proc_subrect_intersection = (rect, subrect) ->
-    for sub in rect.subrects
-      rect_proc_intersection(sub, subrect)
+    if rect.subrects.length == 0
+      rect_proc_intersection(rect, subrect)
+    else
+      for sub in rect.subrects
+        rect_proc_intersection(sub, subrect)
 
 
   rect_proc_intersection = (rect, subrect) ->

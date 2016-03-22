@@ -6,8 +6,8 @@ window.snowflake = ->
     canvas.add new fabric.Rect({
       left: rect.x1
       top: rect.y1
-      width: rect.w
-      height: rect.h
+      width: rect.w || rect_width(rect)
+      height: rect.h || rect_height(rect)
       fill: 'rgba(0,0,0,0)'
       stroke: 'red'
       strokeWidth: 1

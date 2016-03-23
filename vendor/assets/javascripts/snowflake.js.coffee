@@ -136,8 +136,8 @@ window.snowflake = ->
 
 
   calc_circle_points = (radius, points_required, center_point) ->
-    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
-#    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
+#    block_intervals = [{min: 1.04666, max: 2.093333}, {min: 4.186666, max: 5.23333}]
+    block_intervals = [{min: 1.3, max: 1.839993}, {min: 4.440006, max: 4.97999}]
 
     limit = if (isNaN(center_point.angle))
       points_required + Math.ceil(points_required / 1.3)
@@ -288,7 +288,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = Math.max(attrs.w, attrs.h) #def_link_segment_length # attrs.w + def_link_segment_length
+    radius = Math.max(attrs.w / 2, attrs.h / 2) #def_link_segment_length # attrs.w + def_link_segment_length
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

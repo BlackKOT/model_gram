@@ -27,8 +27,8 @@ window.snowflake = ->
     if num1 >= x && num2 >= y
       {
         x1: x, y1: y, x2: num1, y2: num2,
-        w: if (rect2.x1 + rect_width(rect2) / 2 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + def_link_segment_length else rect1.x1 - rect2.x2 - def_link_segment_length
-        h: if (rect2.y1 + rect_height(rect2) / 2 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + def_link_segment_length else rect1.y1 - rect2.y2 - def_link_segment_length
+        w: if (rect2.x1 + rect_width(rect2) / 2 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + 1 else rect1.x1 - rect2.x2 - 1
+        h: if (rect2.y1 + rect_height(rect2) / 2 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + 1 else rect1.y1 - rect2.y2 - 1
       }
     else
       undefined

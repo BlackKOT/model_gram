@@ -3,18 +3,18 @@ window.snowflake = ->
   angleUnit = (limit) -> 6.28 / limit
 
   rect_draw = (canvas, rect) ->
-    canvas.add new fabric.Rect({
-      left: rect.x1
-      top: rect.y1
-      width: rect.w || rect_width(rect)
-      height: rect.h || rect_height(rect)
-      fill: 'rgba(0,0,0,0)'
-      stroke: 'red'
-      strokeWidth: 1
-    })
-
-    for sub in rect.subrects
-      rect_draw(canvas, sub)
+#    canvas.add new fabric.Rect({
+#      left: rect.x1
+#      top: rect.y1
+#      width: rect.w || rect_width(rect)
+#      height: rect.h || rect_height(rect)
+#      fill: 'rgba(0,0,0,0)'
+#      stroke: 'red'
+#      strokeWidth: 1
+#    })
+#
+#    for sub in rect.subrects
+#      rect_draw(canvas, sub)
 
     return true
 
@@ -288,7 +288,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = def_link_segment_length # attrs.w + def_link_segment_length
+    radius = attrs.w / 2 + attrs.h / 2 #def_link_segment_length # attrs.w + def_link_segment_length
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

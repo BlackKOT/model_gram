@@ -288,7 +288,7 @@ window.snowflake = ->
       return rect
 
 
-    radius = Math.max(attrs.w / 2, attrs.h / 2) #def_link_segment_length # attrs.w + def_link_segment_length
+    radius = Math.max(attrs.w, attrs.h) #def_link_segment_length # attrs.w + def_link_segment_length
     points = calc_circle_points(radius, attrs.links.length, point)
 
     for i in [0...attrs.links.length]

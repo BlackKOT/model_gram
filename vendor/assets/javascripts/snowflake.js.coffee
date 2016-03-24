@@ -35,7 +35,7 @@ window.snowflake = ->
 
   rect_proc_subrect_intersection = (rect, subrect) ->
     i = 0
-    while(i++ < 10)
+    while(i++ < 25)
       has_intersections = false
       has_intersections |= rect_proc_intersection(rect.base, subrect)
 
@@ -44,28 +44,35 @@ window.snowflake = ->
 
       if !has_intersections
         break
-
-
-  rect_approve_offset = (rect, offsetx, offsety) ->
-    if Math.abs(offsetx) < Math.abs(offsety) || (rect.moved && rect.moved.y < 0 && offsety < 0)
-      w = offsetx
-      h = 0
-      return {x: w, y: h}
-    else
-      w = 0
-      h = offsety
-      return {x: w, y: h}
-
+    console.error(subrect.name, i)
 
 
   rect_proc_intersection = (rect, subrect) ->
     intersect_rect = rect_intersection(rect, subrect)
     if (intersect_rect)
-      console.log('^', rect, subrect, intersect_rect)
+      console.log('^', intersect_rect.w, intersect_rect.h)
 
-      offset = rect_approve_offset(rect, intersect_rect.w, intersect_rect.h)
+      if Math.abs(intersect_rect.w) < Math.abs(intersect_rect.h)
+        w = intersect_rect.w
+        h = 0
+      else
+        w = 0
+        h = intersect_rect.h
+
+      for moves in subrect.moved
+        if moves.x == intersect_rect.w && moves.y == intersect_rect.h
+          if w != 0
+            w = 0
+            h = intersect_rect.h
+          else
+            w = intersect_rect.w
+            h = 0
+
+          break
+
       console.log('**** start move')
-      rect_move_objects(subrect, offset.x, offset.y)
+      subrect.moved.push({x: intersect_rect.w, y: intersect_rect.h})
+      rect_move_objects(subrect, w, h)
       console.log('**** end move')
 
     return !!intersect_rect
@@ -74,7 +81,8 @@ window.snowflake = ->
   rect_generate = (obj, point) ->
     rect = {
       x1: 99999, y1: 99999, x2: -99999, y2: -99999, objs: [], subrects: [], name: obj.obj.name
-      base: {x1: point.x, y1: point.y, x2: point.x + obj.w, y2: point.y + obj.h}
+      base: {x1: point.x, y1: point.y, x2: point.x + obj.w, y2: point.y + obj.h, moved: []}
+      moved: []
     }
     if obj && !!!obj.x
       rect_add_obj(rect, obj, point)
@@ -108,8 +116,6 @@ window.snowflake = ->
 
 
   rect_move_objects = (rect, offsetx, offsety, mark) ->
-    rect.moved = {x: offsetx, y: offsety}
-
     rect.x1 = 99999
     rect.y1 = 99999
     rect.x2 = -99999

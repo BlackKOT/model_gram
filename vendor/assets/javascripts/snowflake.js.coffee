@@ -27,39 +27,48 @@ window.snowflake = ->
     if num1 >= x && num2 >= y
       {
         x1: x, y1: y, x2: num1, y2: num2,
-        w: if (rect2.x1 + rect_width(rect2) / 2 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + 1 else rect1.x1 - rect2.x2 - 1
-        h: if (rect2.y1 + rect_height(rect2) / 2 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + 1 else rect1.y1 - rect2.y2 - 1
+        w: if (rect2.x1 + rect_width(rect2) / 2 > rect1.x1 + rect_width(rect1) / 2) then rect1.x2 - rect2.x1 + def_link_segment_length else rect1.x1 - rect2.x2 - def_link_segment_length
+        h: if (rect2.y1 + rect_height(rect2) / 2 > rect1.y1 + rect_height(rect1) / 2) then rect1.y2 - rect2.y1 + def_link_segment_length else rect1.y1 - rect2.y2 - def_link_segment_length
       }
     else
       undefined
 
   rect_proc_subrect_intersection = (rect, subrect) ->
-    rect_proc_intersection(rect.base, subrect)
+    i = 0
+    while(i++ < 10)
+      has_intersections = false
+      has_intersections |= rect_proc_intersection(rect.base, subrect)
 
-    for sub in rect.subrects
-      rect_proc_intersection(sub, subrect)
+      for sub in rect.subrects
+        has_intersections |= rect_proc_intersection(sub, subrect)
+
+      if !has_intersections
+        break
+
+
+  rect_approve_offset = (rect, offsetx, offsety) ->
+    if Math.abs(offsetx) < Math.abs(offsety) || (rect.moved && rect.moved.y < 0 && offsety < 0)
+      w = offsetx
+      h = 0
+      return {x: w, y: h}
+    else
+      w = 0
+      h = offsety
+      return {x: w, y: h}
+
 
 
   rect_proc_intersection = (rect, subrect) ->
-    i = 0
-    while(i++ < 10)
-      intersect_rect = rect_intersection(rect, subrect)
-      if (intersect_rect)
-        console.log('^', rect, subrect, intersect_rect)
+    intersect_rect = rect_intersection(rect, subrect)
+    if (intersect_rect)
+      console.log('^', rect, subrect, intersect_rect)
 
-        if Math.abs(intersect_rect.w) < Math.abs(intersect_rect.h)
-          w = intersect_rect.w
-          h = 0
-        else
-          w = 0
-          h = intersect_rect.h
+      offset = rect_approve_offset(rect, intersect_rect.w, intersect_rect.h)
+      console.log('**** start move')
+      rect_move_objects(subrect, offset.x, offset.y)
+      console.log('**** end move')
 
-        console.log('**** start move')
-        rect_move_objects(subrect, w, h)
-        console.log('**** end move')
-        console.log('!', rect_intersection(rect, subrect))
-      else
-        break
+    return !!intersect_rect
 
 
   rect_generate = (obj, point) ->
@@ -99,6 +108,8 @@ window.snowflake = ->
 
 
   rect_move_objects = (rect, offsetx, offsety, mark) ->
+    rect.moved = {x: offsetx, y: offsety}
+
     rect.x1 = 99999
     rect.y1 = 99999
     rect.x2 = -99999
@@ -117,7 +128,6 @@ window.snowflake = ->
       console.log('**', subrect.name)
       rect_move_objects(subrect, offsetx, offsety, mark)
       rect_recalc_bounds(rect, subrect.x1, subrect.y1, subrect.x2, subrect.y2)
-
 
 
   rect_add_subrect = (rect, subrect) ->

@@ -151,9 +151,22 @@ window.snowflake = ->
 #    return {min: min, max: min + 1.57}
 
   calc_bound_rect = (rects) ->
+    offsetx = 0
+    offsety = 0
+
+    for _, attrs of rects
+      if attrs.x < 0
+        offsetx = Math.min(offsetx, attrs.x)
+
+      if attrs.y < 0
+        offsety = Math.min(offsety, attrs.y)
+
     rect = {x1: 999999, y1: 999999, x2: -999999, y2: -999999}
 
     for _, attrs of rects
+      attrs.x -= offsetx
+      attrs.y -= offsety
+
       rect.x1 = Math.min(rect.x1, attrs.x)
       rect.y1 = Math.min(rect.y1, attrs.y)
 
@@ -203,39 +216,7 @@ window.snowflake = ->
       console.error('Points is not enough :(')
     return points
 
-
-#  update_rects = (canvas, rects) ->
-#    for ind in [0...rects.length]
-#      base_rect = rects[ind]
-#      for ind2 in [ind + 1...rects.length]
-#        rect_proc_intersection(base_rect, rects[ind2])
-#
-#    xmin = 999999
-#    ymin = 999999
-#
-#    xmax = -999999
-#    ymax = -999999
-#
-#    if (rects.length > 0)
-#      for rect in rects
-#        xmin = Math.min(xmin, rect.x1)
-#        ymin = Math.min(ymin, rect.y1)
-#        xmax = Math.max(xmax, rect.x2)
-#        ymax = Math.max(ymax, rect.y2)
-#
-#      offsetx = if xmin < 0 then -xmin else 0
-#      offsety = if ymin < 0 then -ymin else 0
-#
-#      for rect in rects
-#        for obj in rect.objs
-#          rect_move_objects(rect, offsetx, offsety, true)
-#
-#        rect_draw(canvas, rect)
-#
-#    {w: Math.min(6000, xmax - xmin), h: Math.min(6000, ymax - ymin)}
-
   distance_between_rects = (rect1, rect2) ->
-    console.log(rect1, rect2)
     Math.sqrt((rect1.x - rect2.x) * (rect1.x - rect2.x) + (rect1.y - rect2.y) * (rect1.y - rect2.y))
 
   # calc full branch distance
@@ -257,40 +238,52 @@ window.snowflake = ->
   #  }
   pack = (canvas, objs) ->
     x = 0
+    sortir = {}
 
     for key, attrs of objs
       attrs.x = x
       attrs.y = 0
       x += def_link_segment_length + attrs.w
 
-    for name, params of objs # calc default weight
-      params.weight = calc_weight(objs, name)
+      hash_key = '' + attrs.links.length
+      (sortir[hash_key] or (sortir[hash_key] = [])).push(key)
 
+    for name, params of objs # calc default weight
+      params.proc = { weight: calc_weight(objs, name), points: {} }
+
+    sorted_lens = Object.keys(sortir).sort().reverse()
     for i in [0..10]
       changed = false
 
-      for name, params of objs # calc default weight
-        continue if params.links.length == 0
+      for len in sorted_lens
+        continue if len == '0'
 
-        radius = def_link_segment_length + params.w / 2
-        points = calc_circle_points(radius, params.links.length, {x: params.x + params.w / 2, y: params.y + params.h / 2})
+        for name in sortir[len]
+          params = objs[name]
 
-        new_weight = params.weight
-        new_point = {x: params.x, y: params.y}
+          radius = def_link_segment_length + params.w
+          points = calc_circle_points(radius, params.links.length, {x: params.x + params.w / 2, y: params.y + params.h / 2})
 
-        for point in points
-          params.x = point.x
-          params.y = point.y
+          new_weight = params.proc.weight
+          new_point = {x: params.x, y: params.y}
 
-          weight = calc_weight(objs, name)
-          if weight < new_weight
-            new_weight = weight
-            new_point = point
+          for point in points
+            params.x = point.x
+            params.y = point.y
 
-        if params.weight > new_weight
-          changed = true
-          params.x = new_point.x
-          params.y = new_point.y
+            weight = calc_weight(objs, name)
+            if weight < new_weight && !!!params.proc.points[new_point]
+              new_weight = weight
+              new_point = point
+
+          if params.proc.weight > new_weight
+            changed = true
+            params.x = new_point.x
+            params.y = new_point.y
+            params.proc.weight = new_weight
+            params.proc.points[new_point] = true
+
+      console.log('---------------------', i)
 
       unless changed
         console.log('Completed: ', i)

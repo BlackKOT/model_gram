@@ -1,6 +1,6 @@
 #= require fabric.linecap
 #= require fabric.canvasex
-#= require snowflake
+#= require snowflake2
 
 
 fabric.Canvas::getObjectsByName = (name) ->

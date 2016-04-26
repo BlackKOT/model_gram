@@ -215,12 +215,12 @@ window.snowflake = ->
   iter = (objs, name, base_point, base_weight, proc_list = {}) ->
     params = objs[name]
     radius = def_link_segment_length + Math.max(params.w / 2, params.h / 2)
-    points = calc_circle_points(radius, params.links.length, {x: base_point.x + params.w / 2, y: base_point.y + params.h / 2})
+    points = calc_circle_points(radius, params.links.length, {x: base_point.x + params.w / 4, y: base_point.y + params.h / 4})
 
     weights = {}
 
     for link in params.links
-      link_params = objs[link]
+#      link_params = objs[link]
 
       for point in points
         new_point = {
@@ -228,8 +228,8 @@ window.snowflake = ->
           y: point.y #- (if point.angle > 3.14 && point.angle < 6.28 then link_params.h else 0)
         }
 
-        curr_weight = base_weight + distance_between_rects(params, new_point)
-
+        distance = distance_between_rects(params, new_point)
+        curr_weight = base_weight + distance
 
         unless proc_list[link]
           proc_list[name] = true
@@ -238,12 +238,10 @@ window.snowflake = ->
         while(weights[curr_weight])
           curr_weight += 0.0001
 
-        weights[curr_weight] = {link: link, point: new_point}
+        weights[curr_weight] = {link: link, point: new_point, distance: distance}
 
     blocked = {}
     total = 0
-
-    console.warn(weights)
 
     for weight_key in Object.keys(weights).sort(sort_func)
       weight = Number(weight_key)
@@ -252,12 +250,12 @@ window.snowflake = ->
       unless blocked[weight_info.link]
         link_params = objs[link]
 
-        if weight < link_params.proc.weight && !!!link_params.proc.points[weight_info.point]
+        if weight < link_params.proc.weight
           link_params.x = weight_info.point.x
           link_params.y = weight_info.point.y
           link_params.proc.weight = weight
           link_params.proc.points[weight_info.point] = true
-          total += weight
+          total += weight_info.distance
 
         blocked[weight_info.link] = true
 

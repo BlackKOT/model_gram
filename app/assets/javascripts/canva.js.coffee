@@ -165,9 +165,13 @@ window.canva = ->
   limitateRelationVisibility = (name, showing) ->
     for relation_name, object of relations
       if relation_name == name
-        console.log(name, showing, object.links)
-        for link in object.links
-          link.visible = showing
+        console.log(object.obj.addChild)
+
+        object.obj.addChild.from.forEach (line_obj) ->
+          line_obj.line.visible = showing
+
+        object.obj.addChild.to.forEach (line_obj) ->
+          line_obj.line.visible = showing
 
     canvas.renderAll()
 

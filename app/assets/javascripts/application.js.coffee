@@ -18,4 +18,7 @@ $ ->
     canvas.load(json)
 
   $('body').on 'change', '.table_marks', ->
-    canvas.limitateRelationVisibility($(@).val(), $(@).is(':checked'))
+    states = {}
+    $('.table_marks').each((i, e)-> states[$(e).val()] = $(e).is(':checked'))
+
+    canvas.limitateRelationVisibility($(@).val(), states)

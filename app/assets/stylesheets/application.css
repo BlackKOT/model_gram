@@ -13,3 +13,13 @@
  *= require_tree .
  *= require_self
  */
+
+.info {
+    float: left;
+    width: 20%;
+}
+
+.canvas {
+    float: right;
+    width: 80%;
+}

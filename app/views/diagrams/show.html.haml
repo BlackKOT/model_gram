@@ -1,6 +1,10 @@
-= button_tag "SAVE", id: :save_schema
-= button_tag "load", id: :load_schema
-%canvas#c{style: 'position: absolute; left: 0px; top: 0px;'}
+.info
+  = button_tag "SAVE", id: :save_schema
+  = button_tag "load", id: :load_schema
+  .tables_list
+
+.canvas
+  %canvas#c{style: 'position: absolute; left: 0px; top: 0px;'}
 :javascript
   window.grid_data = #{@hash.to_json};
 

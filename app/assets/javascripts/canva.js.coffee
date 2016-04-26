@@ -2,7 +2,6 @@
 #= require fabric.canvasex
 #= require snowflake
 
-
 fabric.Canvas::getObjectsByName = (name) ->
   objectList = []
   objects = @getObjects()
@@ -160,6 +159,16 @@ window.canva = ->
             registerRelation(rel_table_field, main_table_field, back_rel_type, cap_styles[rel.rel_type] | if rel.poly then cap_styles['poly'] else 0)
 
     canvas.renderOnAddRemove = true
+    canvas.renderAll()
+
+
+  limitateRelationVisibility = (name, showing) ->
+    for relation_name, object of relations
+      if relation_name == name
+        console.log(name, showing, object.links)
+        for link in object.links
+          link.visible = showing
+
     canvas.renderAll()
 
 
@@ -400,6 +409,8 @@ window.canva = ->
     relations[table.name] = {obj: table, w: table.width, h: table.height, links: []}
     min_canvas_height = Math.max(min_canvas_height, table.height + 100)
 
+    $checkbox = $("<input type='checkbox' class='table_marks' value='#{attrs.table_name}' checked>#{attrs.table_name}")
+    $('.tables_list').append($("<div>#{attrs.table_name}</div>").prepend($checkbox));
 
   removeTable = (name) ->
     object = canvas.getObjectByName(name)
@@ -429,6 +440,7 @@ window.canva = ->
     spacingTables: spacingTables
     proceedTablesList: proceedTablesList
     proceedRelationsList: proceedRelationsList
+    limitateRelationVisibility: limitateRelationVisibility
     save: save
     load: load
   }

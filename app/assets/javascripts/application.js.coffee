@@ -16,4 +16,6 @@ $ ->
   $('#save_schema').on 'click', ->
     json = canvas.save()
     canvas.load(json)
-    
+
+  $('body').on 'change', '.table_marks', ->
+    canvas.limitateRelationVisibility($(@).val(), $(@).is(':checked'))

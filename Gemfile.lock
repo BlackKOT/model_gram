@@ -1,5 +1,5 @@
 PATH
-  remote: /home/jb/projects/rel_gram
+  remote: /home/blackkot/RailsProjects/rel_gram
   specs:
     rel_gram (0.0.1)
       rails
@@ -165,7 +165,7 @@ DEPENDENCIES
   haml-rails
   jbuilder (~> 2.0)
   jquery-rails
-  pg
+  pg (~> 0.18.4)
   rails (= 4.2.5.1)
   rel_gram!
   sass-rails (~> 5.0)

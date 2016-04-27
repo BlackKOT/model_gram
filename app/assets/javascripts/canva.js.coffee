@@ -164,14 +164,16 @@ window.canva = ->
 
   limitateRelationVisibility = (name, states) ->
     for relation_name, object of relations
-      if relation_name == name
 
-        object.obj.addChild.from.forEach (line_obj) ->
-#          console.log(line_obj.to.group.name)
-          line_obj.line.visible = states[line_obj.to.group.name]
+      continue unless object.obj.addChild
 
-        object.obj.addChild.to.forEach (line_obj) ->
-          line_obj.line.visible = states[name]
+      object.obj.addChild.from.forEach (line_obj) ->
+        line_obj.line.visible = false
+
+      object.obj.addChild.from.forEach (line_obj) ->
+        table_name_from = if line_obj.from.group then line_obj.from.group.name else line_obj.from.name
+        table_name_to = if line_obj.to.group then line_obj.to.group.name else line_obj.to.name
+        line_obj.line.visible = true if states[table_name_from] && states[table_name_to]
 
     canvas.renderAll()
 

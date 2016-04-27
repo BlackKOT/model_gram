@@ -19,6 +19,8 @@ $ ->
 
   $('body').on 'change', '.table_marks', ->
     states = {}
-    $('.table_marks').each((i, e)-> states[$(e).val()] = $(e).is(':checked'))
-
+    $('.table_marks').each((i, e) ->
+      states[$(e).val()] = $(e).is(':checked')
+      true
+    )
     canvas.limitateRelationVisibility($(@).val(), states)
